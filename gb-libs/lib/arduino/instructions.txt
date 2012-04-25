@@ -1,0 +1,5 @@
+To setup the arduino libs:
+1. Copy all .h from ide/hardware/arduino/core
+2. Copy pins_arduino.h from ide/hardware/arduino/variants/standard
+3. Copy the core.a from a build and place it in the directory
+4. Copy required libraries to the libraries directory

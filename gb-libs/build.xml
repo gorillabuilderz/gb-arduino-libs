@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="gb-arduino-libs" default="dist">
+    <description>
+            GorillaBuilderz Arduino libraries. Contains libraries and support code for the range of GorillaBuilderz Arduino shields.
+    </description>
+	
+	<property environment="env"/>
+	<property file="build.properties"/>
+	<property name="src"   location="src"/>
+	<property name="docs"   location="docs"/>
+	<property name="build" location="build/target"/>
+	<property name="bin" location="build/bin"/>
+	<property name="dist"  location="build"/>
+	<property name="lib" location="lib"/>
+	<property name="lib.arduino-core" location="lib/arduino/${arduino.version}"/>
+	<property name="lib.build" location="lib/build"/>
+	<property name="avr.compile.flags" value="-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=${mcu.type} -DF_CPU=${mcu.frequency} -DARDUINO=${arduino.version}" />
+	<property name="avr.link.flags" value="-Os -Wl,--gc-sections -mmcu=${mcu.type}" />
+	
+	<target name="hudson-version" if="env.JOB_NAME">
+		<echo>Hudson Job: ${env.JOB_NAME}</echo>
+		<property name="version" value="${env.JOB_NAME}_${env.BUILD_NUMBER}-${env.BUILD_ID}"/>
+	</target>
+	
+	<target name="version" depends="hudson-version">
+		<property name="version" value="MANUAL-BUILD"/>
+		<echo>Building: ${version}</echo>
+	</target>
+
+	<target name="clean">
+		<delete dir="${dist}" />
+		<delete dir="${build}" />
+		<delete dir="${bin}" />
+	</target>
+	
+	<target name="build" depends="clean, version">
+		<echo message="${version}" file="${build}/${ant.project.name}/version.txt"/>
+		
+		<mkdir dir="${build}/${ant.project.name}" />
+		<copy todir="${build}/${ant.project.name}/libraries">
+			<fileset dir="${src}"/>
+		</copy>
+		<copy todir="${build}/${ant.project.name}/docs">
+			<fileset dir="${docs}" excludes="README.md LICENSE"/>
+		</copy>
+		
+		<copy todir="${build}/${ant.project.name}" >
+			<fileset dir="${basedir}" includes="README.md LICENSE"/>
+		</copy>
+	</target>
+	
+	<target name="hudson-dist-name" if="env.JOB_NAME">
+		<echo>Hudson Job: ${env.JOB_NAME}</echo>
+		<property name="dist.name" value="${env.JOB_NAME}"/>
+	</target>
+	
+	<target name="dist-name" depends="hudson-dist-name">
+		<property name="dist.name" value="${ant.project.name}"/>
+		<echo>Distribution Name: ${dist.name}</echo>
+	</target>
+
+	
+	<target name="dist" depends="clean,build,dist-name">
+		<mkdir dir="${dist}" />
+		<zip destfile="${dist}/${dist.name}.zip" duplicate="fail">
+			<fileset dir="${build}" />
+		</zip>
+	</target>
+	
+	<target name="compile" depends="clean,dist-name">
+		
+		<path id="compile.includes.path">
+			<dirset dir="${lib.arduino-core}/core" excludes="**/examples/**" />
+			<dirset dir="${src}"/>
+			<dirset dir="${lib.arduino-core}/libraries" excludes="**/examples/**" />
+		</path>
+		
+		<pathconvert property="compile.includes" refid="compile.includes.path" pathsep=" -I" />
+		
+		<mkdir dir="${bin}" />
+		<!-- Create empty directory set -->
+		<copy todir="${bin}">
+			<dirset dir="${src}"/>
+		</copy>
+		
+		<!-- Compile the sketches
+		
+		TODO: Add Arduino.h to file
+		TODO: Add method prototypes after Arduino.h just as the ide does 
+		TODO: Remove the manual .h file includes
+		-->
+		<copy todir="${bin}">
+			<fileset dir="${src}" includes=" **/*.pde **/*.ino"/>
+			<mapper type="regexp" from="^(.*)\.(pde|ino)" to="\1.cpp"/>
+		</copy>
+		
+		<apply executable="avr-g++" dest="${bin}" parallel="false" failonerror="true">
+			<arg line="${avr.compile.flags}"/>
+			<arg line="-I${compile.includes}"/>
+			<srcfile/>
+			<arg value="-o"/><targetfile/>
+			<fileset dir="${bin}" includes="**/*.cpp" />
+			<mapper type="glob" from="*.cpp" to="*.cpp.o"/>
+		</apply>
+		
+		<!-- Compile the libraries -->
+		<apply executable="avr-g++" dest="${bin}" failonerror="true">
+			<arg line="${avr.compile.flags}"/>
+			<arg line="-I${compile.includes}"/>
+			<arg value="-o"/><targetfile/> <srcfile/>
+			<fileset dir="${src}" includes="**/*.cpp" />
+			<mapper type="glob" from="*.cpp" to="*.o"/>
+		</apply>
+
+		
+		<!--
+		# To Link:
+		# avr-gcc -Os -Wl,-gc-sections -mmcu=atmega328p -o /tmp/build7047812164273774237.tmp/GB4DLcd1Verify.cpp.elf /tmp/build7047812164273774237.tmp/GB4DLcd1Verify.cpp.o /tmp/build7047812164273774237.tmp/GBStatus/GBStatus.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SerialTransport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SpiTransport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/Transport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SC16SpiTransport.cpp.o /tmp/build7047812164273774237.tmp/GB4DLcdDriver/GB4DLcdDriver.cpp.o /tmp/build7047812164273774237.tmp/GB4DLcdDriver/Console.cpp.o /tmp/build7047812164273774237.tmp/SPI/SPI.cpp.o /tmp/build7047812164273774237.tmp/GBIMAC/GBIMAC.cpp.o /tmp/build7047812164273774237.tmp/SD/SD.cpp.o /tmp/build7047812164273774237.tmp/SD/File.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/SdFile.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/Sd2Card.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/SdVolume.cpp.o /tmp/build7047812164273774237.tmp/core.a -L/tmp/build7047812164273774237.tmp -lm
+		<path id="link.includes.path">
+			<fileset dir="${bin}" includes="**/*.o" />
+			<fileset dir="${lib.arduino-core}" includes="**/*.a"/>
+		</path>
+		
+		<pathconvert property="link.includes" refid="link.includes.path" pathsep=" " />
+		<exec executable="avr-gcc" failonerror="true">
+			<arg line="${avr.link.flags}"/>
+			<arg value="${link.includes}"/>
+			<arg value="-L${bin}"/>
+			<arg value="-lm"/>
+		</exec>
+		-->
+	</target>
+	
+	<target name="cts-int" depends="compile"/>
+</project>
