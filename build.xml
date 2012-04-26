@@ -37,7 +37,7 @@
 		<echo message="${version}" file="${build}/${ant.project.name}/version.txt"/>
 		
 		<mkdir dir="${build}/${ant.project.name}" />
-		<copy todir="${build}/${ant.project.name}/libraries">
+		<copy todir="${build}/${ant.project.name}/src">
 			<fileset dir="${src}"/>
 		</copy>
 		<copy todir="${build}/${ant.project.name}/docs">
