@@ -13,9 +13,13 @@ Enjoy!
 ```
 sketchbook
     |- libraries
+    |    |- GB4DGraphics
     |    |- GB4DLcdDriver
+    |    |- GBEthernet
     |    |- GBIMAC
+    |    |- GBStatus
     |    |- GBTransport
+    |    |- GBUtils
 ```   
 Quoted:
 > "If you're using one of these libraries, you need to install it first. To do so, 
