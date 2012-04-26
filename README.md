@@ -45,7 +45,7 @@ The modules included in this library:
 * *GB4DGraphics*: Basic graphics widgets built on the GB4DLcdDriver 
 * *GBEthernet*: Work in progress support for our WiFi shield
 
-TODO Provide an architecture overview diagram 
+![Architecture](docs/Architecture.png) 
 
 The best place to start to see general usage of the library is to open up the example sketches included. These can be a basis for your own sketch.
 
