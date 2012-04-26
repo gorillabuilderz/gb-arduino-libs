@@ -17,7 +17,7 @@ sketchbook
     |    |- GBIMAC
     |    |- GBTransport
 ```   
-	Quoted:
+Quoted:
 > "If you're using one of these libraries, you need to install it first. To do so, 
 	download the library and unzip it. It should be in a folder of its own, and 
 	will typically contain at least two files, one with a .h suffix and one with 
@@ -45,7 +45,7 @@ The modules included in this library:
 * *GB4DGraphics*: Basic graphics widgets built on the GB4DLcdDriver 
 * *GBEthernet*: Work in progress support for our WiFi shield
 
-![Architecture](docs/Architecture.png) 
+![Architecture](http://gorillabuilderz.com.au/wiki/images/4/45/Gb-arduino-libs-achitecture.png) 
 
 The best place to start to see general usage of the library is to open up the example sketches included. These can be a basis for your own sketch.
 
