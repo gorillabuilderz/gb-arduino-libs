@@ -9,7 +9,6 @@ Enjoy!
 
 ## Installation Instructions
 1. Installation is just like any other [Arduino library][libraries] install. Locate the directory where your sketches are stored (refferred to as the [sketchbook][environment]), copy all folders from the `gb-arduino-libs/src` folder to your sketchbook `libraries` folder so that the structure under the libraries folder is such:
-
 ```
 libraries
     |- GB4DGraphics
@@ -20,8 +19,7 @@ libraries
     |- GBTransport
     |- GBUtils
 ```   
-
-    If you're not too sure where to find your sketchbook folder, you can view or change the location by the Arduino IDE Preferences dialog. Generally this can be one of three places depending on your Opertating System:
+If you're not too sure where to find your sketchbook folder, you can view or change the location by the Arduino IDE Preferences dialog. Generally this can be one of three places depending on your Opertating System:
     * Linux: `$HOME/sketchbook`
     * Windows: `My Documents\Arduino`
     * Mac: `$HOME/Documents/Arduino`
