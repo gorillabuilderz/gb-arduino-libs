@@ -8,33 +8,29 @@ Enjoy!
 
 
 ## Installation Instructions
-1. To install, follow [this Arduino Reference Libraries guide](http://arduino.cc/it/Reference/Libraries), under the "Contributed Libraries" section, which is quoted below. In brief, copy all folders from `gb-arduino-libs/src` folder to your sketchbook/libraries folder so that the structure is such:
+1. Installation is just like any other [Arduino library][libraries] install. Locate the directory where your sketches are stored (refferred to as the [sketchbook][environment]), copy all folders from the `gb-arduino-libs/src` folder to your sketchbook `libraries` folder so that the structure under the libraries folder is such:
 
 ```
-sketchbook
-    |- libraries
-    |    |- GB4DGraphics
-    |    |- GB4DLcdDriver
-    |    |- GBEthernet
-    |    |- GBIMAC
-    |    |- GBStatus
-    |    |- GBTransport
-    |    |- GBUtils
+libraries
+    |- GB4DGraphics
+    |- GB4DLcdDriver
+    |- GBEthernet
+    |- GBIMAC
+    |- GBStatus
+    |- GBTransport
+    |- GBUtils
 ```   
-Quoted:
-> "If you're using one of these libraries, you need to install it first. To do so, 
-	download the library and unzip it. It should be in a folder of its own, and 
-	will typically contain at least two files, one with a .h suffix and one with 
-	a .cpp suffix. Open your Arduino sketchbook folder. If there is already a folder 
-	there called libraries, place the library folder in there. If not, create a 
-	folder called libraries in the sketchbook folder, and drop the library folder 
-	in there. Then re-start the Arduino programming environment, and you should see
-	your new library in the Sketch > Import Library menu."
+
+    If you're not too sure where to find your sketchbook folder, you can view or change the location by the Arduino IDE Preferences dialog. Generally this can be one of three places depending on your Opertating System:
+    * Linux: `$HOME/sketchbook`
+    * Windows: `My Documents\Arduino`
+    * Mac: `$HOME/Documents/Arduino`
+
 2. Restart the Arduino IDE.
 3. Open and play with the GB* Examples from the File->Examples menu.
 
 ## Upgrade Instructions
-1. Remove all GorillaBuilderz libraries (GB*) folders from your Arduino sktechbook folder.
+1. Remove all GorillaBuilderz libraries (GB*) folders from your [Arduino sketchbook][environment] folder.
 2. Follow the Installation Instructions above
 
 ## Modules Included
@@ -65,3 +61,6 @@ If you're interested in running the Ant build yourself, there are a couple of pr
 
 * Apache Ant installation
 * avr dude installation
+
+[libraries]: http://arduino.cc/it/Reference/Libraries  "Arduino Libraries"
+[environment]: http://arduino.cc/en/Guide/Environment "Arduino Environment"
