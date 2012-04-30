@@ -13,6 +13,7 @@ Enjoy!
 libraries
     |- GB4DGraphics
     |- GB4DLcdDriver
+    |- GBDiagnose
     |- GBEthernet
     |- GBIMAC
     |- GBStatus
@@ -42,6 +43,7 @@ The modules included in this library:
 * *GB4DLcdDriver*: 4D Systems SGC Driver 
 * *GB4DGraphics*: Basic graphics widgets built on the GB4DLcdDriver 
 * *GBEthernet*: Work in progress support for our WiFi shield
+* *GBDiagnose*: A suit of sketches to assist troubleshoo
 
 ![Architecture](http://gorillabuilderz.com.au/wiki/images/4/45/Gb-arduino-libs-achitecture.png) 
 
