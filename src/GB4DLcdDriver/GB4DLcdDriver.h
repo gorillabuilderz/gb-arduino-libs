@@ -88,11 +88,12 @@ class GB4DLcdDriver
     GB4DLcdDriver(Transport *transport);
     
     // Utility methods
-    bool initialise();
-    virtual bool reset();
+    virtual bool initialise();
+    void reset();
     void version(boolean showOnScreen);
     bool isAck(uint8_t reply);
     bool isNack(uint8_t reply);
+    uint8_t getLcdResetPin();
     int16_t getHorizontalResolution();
     int16_t getVerticalResolution();
     
@@ -148,7 +149,7 @@ class GB4DSerialLcdDriver : public GB4DLcdDriver
 class GB4DSPILcdDriver : public GB4DLcdDriver
 {
 	public:
-  		static const int DEFAULT_CHIPSELECT = 6;
+  		static const int DEFAULT_CHIPSELECT = 2;
   
 		GB4DSPILcdDriver(int chipSelect = DEFAULT_CHIPSELECT) : GB4DLcdDriver(&_spiTransport) {
 			_spiTransport.setChipSelect(chipSelect);
@@ -174,8 +175,8 @@ class GB4DSPILcdDriver : public GB4DLcdDriver
 	    	return isAck(SGC_COMMANDS_STRUCT::DISPLAY_ACK);
 	    }
 
-	    bool reset() {
-	    	if(!GB4DLcdDriver::reset()) {
+	    bool initialise() {
+	    	if(!GB4DLcdDriver::initialise()) {
 	    		return false;
 	    	}
 
@@ -206,7 +207,7 @@ class GB4DMOTGLcdDriver : public GB4DLcdDriver
 		 * Nothing really to do in reset other than clear the screen. Would be nice to have
 		 * some type of reset control line.
 		 */
-		bool reset() { 
+		bool initialise() {
 			clearScreen();
 			return true; 
 		}

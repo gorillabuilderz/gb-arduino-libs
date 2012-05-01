@@ -35,26 +35,31 @@ bool GB4DLcdDriver::initialise() {
 		return false;
 	}
 
-	return reset();
+	reset();
+
+  	// Wait > 500ms (+ more for memory cards)
+  	// Large memory cards can take up to 3 seconds
+  	delay(SGC_COMMANDS.INIT_DELAY);
+
+  	_transport->select();
+  	_transport->prepareWrite();
+  	_transport->write(SGC_COMMANDS.AUTOBAUD);
+  	_transport->deselect();
+
+  	return isAck(readReply());
 }
 
-bool GB4DLcdDriver::reset() {
+void GB4DLcdDriver::reset() {
 	pinMode(SGC_COMMANDS.LCD_PIN, OUTPUT);
 	
 	// Reset and initialise the display
   	digitalWrite(SGC_COMMANDS.LCD_PIN, LOW);
   	delay(10);
   	digitalWrite(SGC_COMMANDS.LCD_PIN, HIGH);  
-  	// Wait > 500ms (+ more for memory cards)
-  	// Large memory cards can take up to 3 seconds
-  	delay(SGC_COMMANDS.INIT_DELAY);
-  
-  	_transport->select();
-  	_transport->prepareWrite();
-  	_transport->write(SGC_COMMANDS.AUTOBAUD);
-  	_transport->deselect();
-  	
-  	return isAck(readReply());
+}
+
+uint8_t GB4DLcdDriver::getLcdResetPin() {
+	return SGC_COMMANDS.LCD_PIN;
 }
 
 void GB4DLcdDriver::version(boolean showOnScreen) {

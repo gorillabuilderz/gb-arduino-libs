@@ -35,7 +35,7 @@ extern SC16IS740_BAUDRATE_STRUCT SC16IS740_BAUDRATE;
 class SC16SpiTransport : public Transport
 {
   public:
-    SC16SpiTransport(int chipSelect = 6, int16_t baudRate = SC16IS740_BAUDRATE.B9600);
+    SC16SpiTransport(int chipSelect = 2, int16_t baudRate = SC16IS740_BAUDRATE.B9600);
     
     void setChipSelect(int chipSelect);
     int getChipSelect();
