@@ -9,13 +9,14 @@
 // Required for automated GB build verification, you won't need this in your sketch, the IDE takes care of it
 #include "GB4DLcd1Verify.h"
 
-int SD_CARD_CHIP_SELECT = 10;
+int SD_CARD_CHIP_SELECT = 3;
+boolean sdInitialised = false;
 GB4DSerialLcdDriver serialLcd;
 GB4DSPILcdDriver spiLcd;
 
 Console console(&serialLcd);
 
-GBIMAC mac(A2);
+GBIMAC mac(4);
 byte macAddress[MAC_LENGTH];;
 
 File testFile;
@@ -50,10 +51,14 @@ void doTestSD() {
   String(SD_CARD_CHIP_SELECT, DEC).toCharArray(chipSelectBuffer, 3);
   console.println(chipSelectBuffer);
   
-  if (!SD.begin(SD_CARD_CHIP_SELECT)) {
+  // If we're not already initialised and SD fails to initialise
+  if (!sdInitialised && !SD.begin(SD_CARD_CHIP_SELECT)) {
     console.println(SGC_COLORS.RED, "SD Card: ", "Initialisation Failed");
     return;
   }
+  
+  // SD is initialised
+  sdInitialised = true;
   
   // Remove the test file first
   SD.remove("test.txt");
