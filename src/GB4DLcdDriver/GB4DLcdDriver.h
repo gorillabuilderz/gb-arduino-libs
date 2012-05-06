@@ -9,7 +9,7 @@
 #include <SC16SpiTransport.h>
 
 struct SGC_COMMANDS_STRUCT {
-	static const int	 	INIT_DELAY					= 1000;
+	static const int	 	INIT_DELAY					= 2000;
 	static const uint8_t 	LCD_PIN 					= 0x07;
 	
 	// Flow control
