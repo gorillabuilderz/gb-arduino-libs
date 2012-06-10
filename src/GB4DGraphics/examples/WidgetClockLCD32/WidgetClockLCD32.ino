@@ -38,7 +38,7 @@ lcd.drawRectangle(2, 2, 238, 318, SGC_COLORS.BLACK);
 lcd.drawRectangle(15, 35, 225, 280, SGC_COLORS.GREEN);  
 lcd.drawRectangle(20, 40, 220, 275, SGC_COLORS.BLACK);  
 
-lcd.drawString(8,1,SGC_FONT_SIZE.MEDIUM,SGC_COLORS.CYAN,"WidgetClock Demo");
+lcd.drawString(8,1,SGC_FONT_SIZE.MEDIUM,SGC_COLORS.WHITE,"WidgetClock Demo");
 lcd.drawString(10,3,SGC_FONT_SIZE.MEDIUM,SGC_COLORS.CYAN,"(uLCD-32PT)");
 lcd.drawString(9,36,SGC_FONT_SIZE.MEDIUM,SGC_COLORS.WHITE,"LCD Shield by");
 lcd.drawString(4,38,SGC_FONT_SIZE.MEDIUM,SGC_COLORS.GREEN,"www.GorillaBuilderz.com");
