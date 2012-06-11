@@ -9,6 +9,10 @@
 // Required for automated GB build verification, you won't need this in your sketch, the IDE takes care of it
 #include "GB4DLcd1Verify.h"
 
+// to run, upload to the arduino (with SPI switch selected) then switch to
+// serial mode and reset the board (make sure no serial monitors are running).
+// Wait for the prompt and switch back to SPI mode to finish running the test.
+
 int SD_CARD_CHIP_SELECT = 3;
 boolean sdInitialised = false;
 GB4DSerialLcdDriver serialLcd;

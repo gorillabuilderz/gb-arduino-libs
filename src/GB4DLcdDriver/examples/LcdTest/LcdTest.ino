@@ -3,6 +3,9 @@
 #include <GB4DLcdDriver.h>
 #include <SPI.h>
 
+// Use SPI switch to upload the sketch and then switch to Serial
+// mode to run the sketch and restart.
+
 GB4DSerialLcdDriver lcd;
 //GB4DSPILcdDriver lcd;
 
