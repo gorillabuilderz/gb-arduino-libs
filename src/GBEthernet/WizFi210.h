@@ -115,7 +115,7 @@ class WizFi210Class : public Stream
 	int peek();
 	void flush() {};
     
-    char receiveResponse();
+    char receiveResponse(char expectedResponse = -1);
     
     bool isOk(char response);
     

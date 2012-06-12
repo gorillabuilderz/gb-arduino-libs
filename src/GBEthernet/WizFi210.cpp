@@ -147,8 +147,7 @@ bool WizFi210Class::isOk(char response) {
 	return response == MODEM_RESPONSE_CODES::OK;
 }
 
-char WizFi210Class::receiveResponse() {
-	char expectedResponse = MODEM_RESPONSE_CODES::OK;
+char WizFi210Class::receiveResponse(char expectedResponse) {
 	unsigned long timeout = millis() + TIMEOUT;
   
   	char response = -1;
@@ -168,23 +167,42 @@ char WizFi210Class::receiveResponse() {
       		for(int index = 0; index < available; index++) {
         		response = _transport.read();
         		_responseHandler.putByte(response);
-        		if(DEBUG) Serial.print(response);
-//        		Serial.print(response, HEX);
-//        		Serial.print(" ");
+        		if(DEBUG) {
+        			Serial.print(response);
+//        			Serial.print(response, HEX);
+//        			Serial.print(" ");
+        		}
       		}      
       		_transport.deselect();
 
       		_transport.select();
-    		// If there's more items available, this response is not what we're looking for, we want the
-    		// last byte transmitted
-    		if(_transport.available() > 0) {
-    			response = -1;
-    		}
+
+      		// Dodgy logic to cater for when the modem does not send through a \n0 on connect. Instead terminates
+      		// command response with a 0 appended. Makes it hard to decipher if the 0 is part of the IP or the OK code
+      		// Possibly need to conver this to process a [OK/ERROR] instead
+
+      		// If expected response is set
+      		if(expectedResponse != -1) {
+				// If there's more items available, this response is not what we're looking for, we want the
+				// last byte transmitted
+				if(_transport.available() > 0) {
+					response = -1;
+				}
+      		}
     		_transport.deselect();
-      		// If the response is as expected
-			if(_responseHandler.isResponseReady()) {
-				break;
-			}
+
+    		if(expectedResponse == -1) {
+				// If the response is as expected
+				if(_responseHandler.isResponseReady()) {
+					response = _responseHandler.getResponseCode();
+					break;
+				}
+    		}
+    		else if(expectedResponse != -1) {
+    			if(response == expectedResponse) {
+    				break;
+    			}
+    		}
 			      		
       		_transport.select();
 		}
@@ -196,13 +214,13 @@ char WizFi210Class::receiveResponse() {
 		if(DEBUG) Serial.println();     
     	if(DEBUG) Serial.println("-- Timed Out");
     	if(DEBUG) Serial.print("Response was:");
-    	if(DEBUG) Serial.println(_responseHandler.getResponseCode());
+    	if(DEBUG) Serial.println(response);
   	}
   	else {
-  		if(_responseHandler.getResponseCode() >= 0) {
+  		if(response >= 0) {
   			if(DEBUG) {
 				if(DEBUG) Serial.println();
-  				if(isOk(_responseHandler.getResponseCode())) {
+  				if(isOk(response)) {
     	      		Serial.println("-- OK Received");
   				}
   				else {
@@ -235,10 +253,7 @@ void WizFi210Class::disassociate() {
 
 bool WizFi210Class::associate(const char* SSID) {
   	sendCommand("AT+WA=", SSID, COMMAND_TERMINATOR);
-  	receiveResponse();
-  	sendCommand("AT", COMMAND_TERMINATOR);
-  	receiveResponse();
-  	return associated();
+  	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 }
 
 bool WizFi210Class::setAutoAssociate(const char* SSID) {
@@ -317,7 +332,7 @@ void WizFi210Class::setAutoTcpListen(int port) {
 
 bool WizFi210Class::autoAssociateAndConnect() {
 	sendCommand("ATA", COMMAND_TERMINATOR);
-	_connected = isOk(receiveResponse());
+	_connected = isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 	_inDataMode = _connected;
 	return _connected;
 }
