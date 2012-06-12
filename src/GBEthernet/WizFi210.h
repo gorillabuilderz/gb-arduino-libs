@@ -3,41 +3,7 @@
 
 #include <Arduino.h>
 #include <SC16SpiTransport.h>
-
-/**
- * GorillaBuilderz utility class, created primarily to expose the underlying Arduino char array backing
- * the String object
- */
-class GString :  public String {
-	public:
-		GString( const char *value = "" ) : String(value) {};
-	    GString( const String &value ) : String(value) {};
-	    GString( const char value) : String(value) {};
-	    GString( const unsigned char value) : String(value) {};
-	    GString( const int value, const int base=10) : String(value, base) {};
-	    GString( const unsigned int value, const int base=10 ) : String(value, base) {};
-	    GString( const long value, const int base=10 ) : String(value, base) {};
-	    GString( const unsigned long value, const int base=10 ) : String(value, base) {};
-	
-		const GString & operator = ( const GString &rhs ) { return String::operator=(rhs); };
-    	const GString & operator +=( const GString &rhs ) { return String::operator+=(rhs); };
-    	const GString & operator +=( const char rhs) { return String::operator+=(rhs); };
-	
-		char *getBuffer() { return buffer; }
-};
-
-// TODO Cleanup these. Probably won't need them after using response codes
-class MODEM_RESPONSE {
-	public:
-		static const char  RESPONSE_START;
-		static const char* OK;
-		static const char* OK_START;
-		static const char* ERROR;
-		static const char* ERROR_START;
-		static const char* ERROR_INVALID_INPUT;
-		static const char* ERROR_SOCKET_FAILURE;
-		static const char* ERROR_NO_CID;
-};
+#include <GString.h>
 
 class MODEM_RESPONSE_CODES {
 	public:
@@ -54,6 +20,21 @@ class MODEM_RESPONSE_CODES {
 		static const char CONNECTION_DISCONNECT	= '8';
 		static const char DISASSOCIATED			= '9';
 		static const char DISASSOCIATION_EVENT	= 'A';
+
+		bool static isValidResponseCode(uint8_t newByte) {
+			return
+					newByte == OK ||
+					newByte == ERROR ||
+					newByte == ERROR_INVALID_INPUT ||
+					newByte == ERROR_SOCKET_FAILURE ||
+					newByte == ERROR_NO_CID ||
+					newByte == ERROR_INVALID_CID ||
+					newByte == ERROR_NOT_SUPPORTED ||
+					newByte == CONNECTION_SUCCESS ||
+					newByte == CONNECTION_DISCONNECT ||
+					newByte == DISASSOCIATED ||
+					newByte == DISASSOCIATION_EVENT;
+		}
 };
 
 class MODEM_COMMANDS {
@@ -61,9 +42,64 @@ class MODEM_COMMANDS {
 		static const char *AT;
 };
 
+/**
+ * Class deals with modem responses. It builds up received bytes and looks for specific response arrays.
+ *
+ * We're looking for reponse of: \n0
+ *
+ */
+class ResponseCodeHandler {
+public:
+	void reset() {
+		_byteCount = 0;
+	}
+
+	void putByte(uint8_t newByte) {
+		// If the new byte is carriage return and byteCount is zero, this is the start of the response
+		if(
+//			(newByte == '\r' && _byteCount == 0) ||
+//			(newByte == '\n' && _byteCount == 1) ||
+//			(_byteCount == 2) ||
+//			(newByte == '\r' && _byteCount == 3) ||
+//			(newByte == '\n' && _byteCount == 4)
+			(newByte == 0x0A && _byteCount == 0) ||
+			(_byteCount == 1 && MODEM_RESPONSE_CODES::isValidResponseCode(newByte))
+		) {
+			// Add the new byte and increment byte count
+			_responseBuffer[_byteCount++] = newByte;
+		}
+		else {
+			// Force a reset, don't have the response we want in the order we want
+			reset();
+		}
+	}
+
+	bool isResponseReady() {
+		// Is ready if the byte count is 5
+		return _byteCount == 2;
+	}
+
+	uint8_t getResponseCode() {
+		if(isResponseReady()) {
+			return _responseBuffer[1];
+		}
+		else {
+			return -1;
+		}
+	}
+
+private:
+	char _responseBuffer[5];
+	uint8_t _byteCount;
+};
+
 class WizFi210Class : public Stream
 {
   public:
+  	static const char *COMMAND_TERMINATOR;
+  	static const char *COMMAND_SECTION_TERMINATOR;
+  	static const char *COMMAND_SEPERATOR;
+
     WizFi210Class();
     
     void reset();
@@ -73,14 +109,15 @@ class WizFi210Class : public Stream
     size_t write(const uint8_t byte);
     size_t write(const uint8_t *buffer, size_t size);
     bool connected();
+    bool associated();
 	int available();
 	int read();
 	int peek();
 	void flush() {};
     
-    char* receiveResponse(); 
-    bool receiveResponse(char expectedResponse);
+    char receiveResponse();
     
+    bool isOk(char response);
     
     // Keep things transparent to the application
     void setMac(uint8_t *mac);
@@ -104,21 +141,23 @@ class WizFi210Class : public Stream
     void closeAllConnections();
     void enterDataMode();
     void escapeDataMode();
+
+    Transport* getTransport();
+    uint8_t getResetPin();
 	
   private:
-  	static const char *COMMAND_TERMINATOR;
-  	static const char *COMMAND_SECTION_TERMINATOR;
-  	static const char *COMMAND_SEPERATOR;
-  	static const bool DEBUG 				= true;
-  	static const uint8_t RESET_PIN 			= 6;
-  	static const unsigned long TIMEOUT 		= 15000;
+  	static const bool DEBUG 					= true;
+  	static const uint8_t RESET_PIN 				= A1;
+  	static const uint8_t DEFAULT_CHIP_SELECT 	= 2;
+  	static const uint8_t N_ASSOCIATE   			= 5;
+  	static const uint8_t N_WIFI_OK     			= 6;
+  	static const unsigned long TIMEOUT 			= 15000;
+  	ResponseCodeHandler _responseHandler;
   
   	SC16SpiTransport _transport;
   	bool _inDataMode;
   	bool _connected;
   	
-  	bool isResponseOK(String response);
-  	bool isResponseError(String response);
   	void writeIP(uint8_t *ip);
   	void writeMAC(uint8_t *mac);
 };

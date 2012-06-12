@@ -10,22 +10,12 @@ const char *WizFi210Class::COMMAND_TERMINATOR			= "\n";
 const char *WizFi210Class::COMMAND_SECTION_TERMINATOR	= "";
 const char *WizFi210Class::COMMAND_SEPERATOR			= ",";
 
-const char  MODEM_RESPONSE::RESPONSE_START			= '[';
-const char* MODEM_RESPONSE::OK_START				= "[O";
-const char* MODEM_RESPONSE::OK 						= "[OK]";
-const char* MODEM_RESPONSE::ERROR_START				= "[E";
-const char* MODEM_RESPONSE::ERROR 					= "[ERROR]";
-const char* MODEM_RESPONSE::ERROR_INVALID_INPUT 	= "[ERROR: INVALID INPUT]";
-const char* MODEM_RESPONSE::ERROR_SOCKET_FAILURE 	= "[ERROR: SOCKET FAILURE]";
-const char* MODEM_RESPONSE::ERROR_NO_CID 			= "[ERROR: NO CID]";
-
-//const char* MODEM_COMMANDS::AT 						= "AT";
-
-
 WizFi210Class::WizFi210Class() {
  	_connected = false;
  	_inDataMode = false;
- 	_transport = SC16SpiTransport(2, SC16IS740_BAUDRATE.B115200);
+ 	_transport = SC16SpiTransport(DEFAULT_CHIP_SELECT, SC16IS740_BAUDRATE.B115200);
+ 	pinMode(N_ASSOCIATE, INPUT);
+ 	pinMode(N_WIFI_OK, INPUT);
 }
 
 void WizFi210Class::reset() {
@@ -36,7 +26,7 @@ void WizFi210Class::reset() {
   	digitalWrite(RESET_PIN, LOW);  
   	delay(200);
   	digitalWrite(RESET_PIN, HIGH);    
-  	delay(7000);  
+  	delay(7000);
 }
 
 bool WizFi210Class::initialise() {
@@ -52,23 +42,20 @@ bool WizFi210Class::initialise() {
   	
   	if(DEBUG) Serial.println("Initialising modem");
   
-  	sendCommand("AT", COMMAND_TERMINATOR);
+	// Enable numerical responses
+	sendCommand("ATV0", COMMAND_TERMINATOR);
 	receiveResponse();
 
 	// Disable echo
-	sendCommand("ATE0", COMMAND_TERMINATOR);
-	receiveResponse();
-	
-	// Enable numerical responses
-	sendCommand("ATV0", COMMAND_TERMINATOR);
-	receiveResponse(MODEM_RESPONSE_CODES::OK);
+//	sendCommand("ATE0", COMMAND_TERMINATOR);
+//	receiveResponse();
 	
   	_transport.enableHardwareFlowControl(true);
 
   	// Enalbe hardware flow control
   	sendCommand("AT&R1", COMMAND_TERMINATOR);
   	// TODO Hang or continue and return false?
-  	return receiveResponse(MODEM_RESPONSE_CODES::OK);
+  	return isOk(receiveResponse());
 }
 
 void WizFi210Class::sendCommand(const char *command, ...) {
@@ -87,7 +74,7 @@ void WizFi210Class::sendCommand(const char *command, ...) {
 	va_start(commands, command);
   	// Loop through and write out the varargs
 	for (varCommand = command; varCommand != COMMAND_SECTION_TERMINATOR; varCommand = va_arg(commands, char*)) {
-		if(DEBUG) Serial.print(varCommand);
+//		if(DEBUG) Serial.print(varCommand);
 		_transport.write(varCommand);
 
 		if(varCommand == COMMAND_TERMINATOR) {
@@ -104,7 +91,7 @@ void WizFi210Class::sendCommand(const char *command, ...) {
 }
 
 size_t WizFi210Class::write(const uint8_t byte) {
-	if(DEBUG) Serial.print(byte);
+//	if(DEBUG) Serial.print(byte);
 
   	_transport.select();
   	_transport.prepareWrite();
@@ -115,7 +102,7 @@ size_t WizFi210Class::write(const uint8_t byte) {
 }
 
 size_t WizFi210Class::write(const char *string) {
-	if(DEBUG) Serial.print(string);
+//	if(DEBUG) Serial.print(string);
 	
   	_transport.select();
   	_transport.prepareWrite();
@@ -129,7 +116,7 @@ size_t WizFi210Class::write(const uint8_t *buffer, size_t size) {
   	for(int index = 0; index < size; index++) {
 //  		Serial.print(buffer[index], HEX);
 		// TODO Is not printing bytes quite correctly
-  		if(DEBUG) { Serial.write(buffer[index]); }
+//  		if(DEBUG) { Serial.write(buffer[index]); }
   		write(buffer[index]);
   	}
 
@@ -156,37 +143,17 @@ int WizFi210Class::read() {
 	return read;      
 }
 
-
-bool WizFi210Class::isResponseOK(String response) {
-	// Do a couple of quick checks before doing an expensive check
-	if(response.indexOf(MODEM_RESPONSE::RESPONSE_START) < 0) {
-		return false;
-	}
-	
-	if(response.indexOf(MODEM_RESPONSE::OK_START) < 0) {
-		return false;
-	}
-
-	return response.indexOf(MODEM_RESPONSE::OK) >= 0;
+bool WizFi210Class::isOk(char response) {
+	return response == MODEM_RESPONSE_CODES::OK;
 }
 
-bool WizFi210Class::isResponseError(String response) {
-	// Do a couple of quick checks before doing an expensive check
-	if(response.indexOf(MODEM_RESPONSE::ERROR_START) < 0) {
-		return false;
-	}
-	
-	return response.indexOf(MODEM_RESPONSE::ERROR) >= 0 ||
-        			response.indexOf(MODEM_RESPONSE::ERROR_INVALID_INPUT) >= 0 ||
-        			response.indexOf(MODEM_RESPONSE::ERROR_SOCKET_FAILURE) >= 0 ||
-	        		response.indexOf(MODEM_RESPONSE::ERROR_NO_CID) >= 0;
-}
-
-bool WizFi210Class::receiveResponse(char expectedResponse) {
+char WizFi210Class::receiveResponse() {
+	char expectedResponse = MODEM_RESPONSE_CODES::OK;
 	unsigned long timeout = millis() + TIMEOUT;
   
   	char response = -1;
   	int available;
+  	_responseHandler.reset();
 
   	_transport.select();
   	while(timeout > millis()) {
@@ -200,7 +167,10 @@ bool WizFi210Class::receiveResponse(char expectedResponse) {
       		_transport.prepareRead();
       		for(int index = 0; index < available; index++) {
         		response = _transport.read();
-        		if(DEBUG) Serial.print(response);   
+        		_responseHandler.putByte(response);
+        		if(DEBUG) Serial.print(response);
+//        		Serial.print(response, HEX);
+//        		Serial.print(" ");
       		}      
       		_transport.deselect();
 
@@ -212,7 +182,7 @@ bool WizFi210Class::receiveResponse(char expectedResponse) {
     		}
     		_transport.deselect();
       		// If the response is as expected
-			if(response == expectedResponse) {
+			if(_responseHandler.isResponseReady()) {
 				break;
 			}
 			      		
@@ -226,13 +196,13 @@ bool WizFi210Class::receiveResponse(char expectedResponse) {
 		if(DEBUG) Serial.println();     
     	if(DEBUG) Serial.println("-- Timed Out");
     	if(DEBUG) Serial.print("Response was:");
-    	if(DEBUG) Serial.println(response);
+    	if(DEBUG) Serial.println(_responseHandler.getResponseCode());
   	}
   	else {
-  		if(response >= 0) {
+  		if(_responseHandler.getResponseCode() >= 0) {
   			if(DEBUG) {
 				if(DEBUG) Serial.println();
-  				if(MODEM_RESPONSE_CODES::OK) {
+  				if(isOk(_responseHandler.getResponseCode())) {
     	      		Serial.println("-- OK Received");
   				}
   				else {
@@ -243,96 +213,42 @@ bool WizFi210Class::receiveResponse(char expectedResponse) {
   		}
   	}
   
-  	return response == expectedResponse;
-}
-
-char* WizFi210Class::receiveResponse() {
-	unsigned long timeout = millis() + TIMEOUT;
-  
-  	GString response = "";
-  	int available;
-
-  	_transport.select();
-  	while(timeout > millis()) {
-    	if(available = _transport.available()) {
-    		// Extend the timeout, modem is responding
-    		timeout = millis() + TIMEOUT;
-    		
-    		_transport.deselect();
-      		_transport.select();
-      
-      		_transport.prepareRead();
-      		for(int index = 0; index < available; index++) {
-        		char responseChar = _transport.read();
-        		// Need to be careful with mem usage here, the modem could spit out a lot of data
-        		response += responseChar;
-        		if(DEBUG) Serial.print(responseChar);   
-      		}      
-      		_transport.deselect();
-      
-	      	if(response.indexOf(MODEM_RESPONSE::RESPONSE_START) >= 0) {
-	        	if(isResponseOK(response)) {
-		        	if(DEBUG) Serial.println();
-	    	      	if(DEBUG) Serial.println("-- OK Received");
-	        	  	break;
-	        	}
-	        	else if(isResponseError(response)){
-	          		if(DEBUG) Serial.println();          
-	          		if(DEBUG) Serial.print("-- Received error: ");
-	          		if(DEBUG) Serial.println(response);
-	          		if(DEBUG) Serial.println("-- !!locking up!!");
-	          		while(true);
-	        	}
-			}
-			else {
-				// Discard the response
-				response = "";
-			}
-        
-      		_transport.select();
-		}
-	}
-  
-	if(timeout <= millis()) {
-		if(DEBUG) Serial.println();     
-    	if(DEBUG) Serial.println("-- Timed Out");
-    	if(DEBUG) Serial.println("Response was:");
-    	if(DEBUG) Serial.println(response);
-  	}
-  
-  	return response.getBuffer();
+  	return response;
 }
 
 void WizFi210Class::setMac(uint8_t *mac) {
 	sendCommand("AT+NMAC=", COMMAND_SECTION_TERMINATOR);
 	writeMAC(mac);
 	sendCommand(COMMAND_TERMINATOR);
-	receiveResponse(MODEM_RESPONSE_CODES::OK);
+	receiveResponse();
 }
 
 bool WizFi210Class::setWPAPSK(const char* SSID, const char* passphrase) {
 	sendCommand("AT+WPAPSK=", SSID, COMMAND_SEPERATOR, passphrase, COMMAND_TERMINATOR);
-  	return receiveResponse(MODEM_RESPONSE_CODES::OK);
+  	return isOk(receiveResponse());
 }
 
 void WizFi210Class::disassociate() {
   sendCommand("AT+WD", COMMAND_TERMINATOR);
-  receiveResponse(MODEM_RESPONSE_CODES::OK);
+  receiveResponse();
 }
 
 bool WizFi210Class::associate(const char* SSID) {
   	sendCommand("AT+WA=", SSID, COMMAND_TERMINATOR);
-  	return receiveResponse(MODEM_RESPONSE_CODES::OK);
+  	receiveResponse();
+  	sendCommand("AT", COMMAND_TERMINATOR);
+  	receiveResponse();
+  	return associated();
 }
 
 bool WizFi210Class::setAutoAssociate(const char* SSID) {
   	sendCommand("AT+WAUTO=0,", SSID, COMMAND_TERMINATOR);
-	return receiveResponse(MODEM_RESPONSE_CODES::OK);
+	return isOk(receiveResponse());
 }
 
 bool WizFi210Class::enableDHCP(bool enable) {
 	sendCommand("AT+NDHCP=", enable ? "1" : "0", COMMAND_TERMINATOR);
-	return receiveResponse(MODEM_RESPONSE_CODES::OK);
+	return isOk(receiveResponse());
 }
 
 bool WizFi210Class::setNetworkParameters(uint8_t *address, uint8_t *netMask, uint8_t *gateway) {
@@ -344,7 +260,7 @@ bool WizFi210Class::setNetworkParameters(uint8_t *address, uint8_t *netMask, uin
 	writeIP(gateway);
 	sendCommand(COMMAND_TERMINATOR, COMMAND_SECTION_TERMINATOR);
 
-	return receiveResponse(MODEM_RESPONSE_CODES::OK);;
+	return isOk(receiveResponse());
 }
 
 void WizFi210Class::enterDataMode() {
@@ -354,7 +270,7 @@ void WizFi210Class::enterDataMode() {
 
 	if(DEBUG) Serial.print("Entering data mode");
 	sendCommand("ATO", COMMAND_TERMINATOR);
-	_inDataMode = receiveResponse(MODEM_RESPONSE_CODES::OK);
+	_inDataMode = isOk(receiveResponse());
 }
 
 void WizFi210Class::escapeDataMode() {
@@ -389,19 +305,19 @@ void WizFi210Class::setAutoTcpConnect(uint8_t *address, int port) {
   	sendCommand(COMMAND_SEPERATOR, COMMAND_SECTION_TERMINATOR);
   	print(port, DEC);
   	sendCommand(COMMAND_TERMINATOR);
-	receiveResponse(MODEM_RESPONSE_CODES::OK);
+	receiveResponse();
 }
 
 void WizFi210Class::setAutoTcpListen(int port) {
   	sendCommand("AT+NAUTO=1,1,,", COMMAND_SECTION_TERMINATOR);
   	print(port);
   	sendCommand(COMMAND_TERMINATOR);
-	receiveResponse(MODEM_RESPONSE_CODES::OK);
+	receiveResponse();
 }
 
 bool WizFi210Class::autoAssociateAndConnect() {
 	sendCommand("ATA", COMMAND_TERMINATOR);
-	_connected = receiveResponse(MODEM_RESPONSE_CODES::OK);
+	_connected = isOk(receiveResponse());
 	_inDataMode = _connected;
 	return _connected;
 }
@@ -409,11 +325,11 @@ bool WizFi210Class::autoAssociateAndConnect() {
 
 void WizFi210Class::closeAllConnections() {
 	sendCommand("AT+NCLOSEALL", COMMAND_TERMINATOR);
-	_connected = !receiveResponse(MODEM_RESPONSE_CODES::OK);
+	_connected = !isOk(receiveResponse());
 }
 
 bool WizFi210Class::connected() {
-	return _connected;
+	return digitalRead(N_WIFI_OK) == 0;
 }
 
 void WizFi210Class::writeIP(uint8_t *ip) {
@@ -438,4 +354,25 @@ void WizFi210Class::writeMAC(uint8_t *mac) {
 	print(mac[4], HEX);
 	write(":");
 	print(mac[5], HEX);
+}
+
+uint8_t WizFi210Class::getResetPin() {
+	return RESET_PIN;
+}
+
+Transport *WizFi210Class::getTransport() {
+	return &_transport;
+}
+
+bool WizFi210Class::associated() {
+	return digitalRead(N_ASSOCIATE) == 0;
+}
+
+void WizFi210Class::tcpConnect(uint8_t *address, int port) {
+  	sendCommand("AT+NCTCP=", COMMAND_SECTION_TERMINATOR);
+  	writeIP(address),
+  	sendCommand(COMMAND_SEPERATOR, COMMAND_SECTION_TERMINATOR);
+  	print(port, DEC);
+  	sendCommand(COMMAND_TERMINATOR);
+	receiveResponse();
 }
