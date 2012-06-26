@@ -207,29 +207,31 @@ char WizFi210Class::receiveResponse(char expectedResponse) {
       		_transport.select();
 		}
 	}
-	
-	if(DEBUG) Serial.println();
 
-	if(timeout <= millis()) {
-		if(DEBUG) Serial.println();     
-    	if(DEBUG) Serial.println("-- Timed Out");
-    	if(DEBUG) Serial.print("Response was:");
-    	if(DEBUG) Serial.println(response);
-  	}
-  	else {
-  		if(response >= 0) {
-  			if(DEBUG) {
-				if(DEBUG) Serial.println();
-  				if(isOk(response)) {
-    	      		Serial.println("-- OK Received");
-  				}
-  				else {
+  	// Lets print the outcome if required
+	if(DEBUG) {
+		Serial.println();
+
+		if(timeout <= millis()) {
+			Serial.println();
+			Serial.println("-- Timed Out");
+			Serial.print("Response was:");
+			Serial.println(response);
+		}
+		else {
+			if(response >= 0) {
+				Serial.println();
+
+				if(isOk(response)) {
+					Serial.println("-- OK Received");
+				}
+				else {
 					Serial.print("Other response received: ");
 					Serial.println(response);
-  				}
-  			}
-  		}
-  	}
+				}
+			}
+		}
+	}
   
   	return response;
 }
