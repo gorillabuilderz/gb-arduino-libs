@@ -31,10 +31,10 @@
 							<tool id="de.innot.avreclipse.tool.assembler.winavr.app.debug.79974527" name="AVR Assembler" superClass="de.innot.avreclipse.tool.assembler.winavr.app.debug">
 								<option id="de.innot.avreclipse.assembler.option.debug.level.1094340261" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level"/>
 								<option id="de.innot.avreclipse.asm.option.include.paths.1949765544" name="#include paths for preprocessor(-I)" superClass="de.innot.avreclipse.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SPI}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SD/utility}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SD}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SPI}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SD/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SD}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GBTransport}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GBStatus}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GB4DLcdDriver}&quot;"/>
@@ -47,10 +47,10 @@
 								<option id="de.innot.avreclipse.compiler.option.debug.level.105762778" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.2067516133" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.incpath.1626854493" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SPI}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SD/utility}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SD}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SPI}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SD/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SD}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GBTransport}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GBStatus}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GB4DLcdDriver}&quot;"/>
@@ -67,10 +67,10 @@
 								<option id="de.innot.avreclipse.cppcompiler.option.debug.level.1868363876" name="Generate Debugging Info" superClass="de.innot.avreclipse.cppcompiler.option.debug.level"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.optimize.1291517657" name="Optimization Level" superClass="de.innot.avreclipse.cppcompiler.option.optimize" value="de.innot.avreclipse.cppcompiler.optimize.size" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.cppcompiler.option.incpath.601385759" name="Include Paths (-I)" superClass="de.innot.avreclipse.cppcompiler.option.incpath" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/core}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SPI}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SD/utility}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/100/libraries/SD}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/core}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SPI}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SD/utility}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/lib/arduino/101/libraries/SD}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GBTransport}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GBStatus}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gb-arduino-libs/src/GB4DLcdDriver}&quot;"/>
