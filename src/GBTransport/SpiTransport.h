@@ -2,7 +2,7 @@
 #define SpiTransport_h
 
 #include <Arduino.h>
-#include <Transport.h>
+#include "Transport.h"
 #include <SPI.h>
 
 class SpiTransport : public Transport

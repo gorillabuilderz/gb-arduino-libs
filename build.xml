@@ -14,7 +14,7 @@
 	<property name="lib" location="lib"/>
 	<property name="lib.arduino-core" location="lib/arduino/${arduino.version}"/>
 	<property name="lib.build" location="lib/build"/>
-	<property name="avr.compile.flags" value="-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=${mcu.type} -DF_CPU=${mcu.frequency} -DARDUINO=${arduino.version}" />
+	<property name="avr.compile.flags" value="-w -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=${mcu.type} -DF_CPU=${mcu.frequency} -DARDUINO=${arduino.version}" />
 	<property name="avr.link.flags" value="-Os -Wl,--gc-sections -mmcu=${mcu.type}" />
 	
 	<target name="hudson-version" if="env.JOB_NAME">

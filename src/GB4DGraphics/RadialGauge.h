@@ -10,8 +10,8 @@
 
 #include <Arduino.h>
 #include <GB4DLcdDriver.h>
-#include <utility/Widget.h>
-#include <RadialLine.h>
+#include "utility/Widget.h"
+#include "RadialLine.h"
 
 class RadialGauge : public Widget
 {
