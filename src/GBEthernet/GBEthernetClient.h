@@ -1,9 +1,9 @@
 #ifndef gbethernetclient_h
 #define gbethernetclient_h
-#include "Arduino.h"	
-#include "Print.h"
-#include "Client.h"
-#include "IPAddress.h"
+#include <Arduino.h>
+#include <Print.h>
+#include <Client.h>
+#include <IPAddress.h>
 
 class EthernetClient : public Client {
 

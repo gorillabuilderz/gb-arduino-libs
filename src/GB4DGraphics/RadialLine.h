@@ -10,8 +10,8 @@
 
 #include <Arduino.h>
 #include <GB4DLcdDriver.h>
-#include <utility/Widget.h>
-#include <Line.h>
+#include "utility/Widget.h"
+#include "Line.h"
 #include "utility/Radial.h"
 
 class RadialLine : public Line

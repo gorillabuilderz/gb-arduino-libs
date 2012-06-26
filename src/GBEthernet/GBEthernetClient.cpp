@@ -4,7 +4,7 @@ extern "C" {
   #include "string.h"
 }
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 #include "GBEthernet.h"
 #include "GBEthernetClient.h"

@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <GB4DLcdDriver.h>
-#include <utility/Widget.h>
+#include "utility/Widget.h"
 
 class Rectangle : public Widget
 {

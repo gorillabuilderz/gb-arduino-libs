@@ -2,7 +2,7 @@
 #define ethernet_h
 
 #include <inttypes.h>
-#include "IPAddress.h"
+#include <IPAddress.h>
 #include "GBEthernetClient.h"
 #include "GBEthernetServer.h"
 

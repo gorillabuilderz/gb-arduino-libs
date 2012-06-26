@@ -1,5 +1,4 @@
-#include <Arduino.h>
-#include <SC16SpiTransport.h>
+#include "SC16SpiTransport.h"
 #include <string.h>
 
 SC16IS740_REGISTERS_STRUCT REGISTERS;

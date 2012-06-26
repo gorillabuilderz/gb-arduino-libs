@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <SerialTransport.h>
+#include "SerialTransport.h"
 
 SerialTransport::SerialTransport(long baudRate, unsigned long timeout)
 		: Transport(timeout) {
