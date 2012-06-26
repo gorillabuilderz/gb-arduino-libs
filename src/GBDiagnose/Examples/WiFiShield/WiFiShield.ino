@@ -5,6 +5,9 @@
 #include <SPI.h>
 #include <GString.h>
 
+// Required for automated GB build verification, you won't need this in your sketch, the IDE takes care of it
+#include "WiFiShield.h"
+
 // Update this to change from default
 static const int CHIP_SELECT_PIN  = 2;
 static const int RESET_PIN  = A1;
