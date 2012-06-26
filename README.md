@@ -45,7 +45,7 @@ The modules included in this library:
 * *GBEthernet*: Work in progress support for our WiFi shield
 * *GBDiagnose*: A suit of sketches to assist troubleshooting
 
-![Architecture](http://gorillabuilderz.com.au/wiki/images/4/45/Gb-arduino-libs-achitecture.png) 
+![Architecture](../raw/master/docs/Achitecture.png) 
 
 The best place to start to see general usage of the library is to open up the example sketches included. These can be a basis for your own sketch.
 
