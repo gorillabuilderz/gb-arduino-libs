@@ -2,7 +2,7 @@
 #define SC16SpiTransport_h
 
 #include <Arduino.h>
-#include <Transport.h>
+#include "Transport.h"
 #include <SPI.h>
 
 struct SC16IS740_REGISTERS_STRUCT {

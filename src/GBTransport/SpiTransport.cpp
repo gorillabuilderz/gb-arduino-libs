@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <SpiTransport.h>
+#include "SpiTransport.h"
 
 SpiTransport::SpiTransport(int chipSelect)
 		: Transport() {
