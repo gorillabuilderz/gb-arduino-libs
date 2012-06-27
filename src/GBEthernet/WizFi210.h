@@ -56,13 +56,7 @@ public:
 
 	void putByte(uint8_t newByte) {
 		// If the new byte is carriage return and byteCount is zero, this is the start of the response
-		if(
-//			(newByte == '\r' && _byteCount == 0) ||
-//			(newByte == '\n' && _byteCount == 1) ||
-//			(_byteCount == 2) ||
-//			(newByte == '\r' && _byteCount == 3) ||
-//			(newByte == '\n' && _byteCount == 4)
-			(newByte == 0x0A && _byteCount == 0) ||
+		if(handleNumericalResponse(newByte) ||
 			(_byteCount == 1 && MODEM_RESPONSE_CODES::isValidResponseCode(newByte))
 		) {
 			// Add the new byte and increment byte count
@@ -75,7 +69,7 @@ public:
 	}
 
 	bool isResponseReady() {
-		// Is ready if the byte count is 5
+		// Is ready if the byte count is 2
 		return _byteCount == 2;
 	}
 
@@ -91,6 +85,19 @@ public:
 private:
 	char _responseBuffer[5];
 	uint8_t _byteCount;
+
+	/* Not currently used. Needs to be tested to work as expected */
+	bool handleTextResponse(uint8_t newByte) {
+		return 	(newByte == '\r' && _byteCount == 0) ||
+				(newByte == '\n' && _byteCount == 1) ||
+				(_byteCount == 2) ||
+				(newByte == '\r' && _byteCount == 3) ||
+				(newByte == '\n' && _byteCount == 4);
+	}
+
+	bool handleNumericalResponse(uint8_t newByte) {
+		return newByte == 0x0A && _byteCount == 0;
+	}
 };
 
 class WizFi210Class : public Stream
