@@ -137,7 +137,6 @@ class WizFi210Class : public Stream
     void udpConnect(uint8_t *address, int port);
     void udpServer(int port);
     
-    // 
     void closeAllConnections();
     void enterDataMode();
     void escapeDataMode();
@@ -155,8 +154,6 @@ class WizFi210Class : public Stream
   	ResponseCodeHandler _responseHandler;
   
   	SC16SpiTransport _transport;
-  	bool _inDataMode;
-  	bool _connected;
   	
   	void writeIP(uint8_t *ip);
   	void writeMAC(uint8_t *mac);

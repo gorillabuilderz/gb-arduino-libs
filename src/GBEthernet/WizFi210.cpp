@@ -11,8 +11,6 @@ const char *WizFi210Class::COMMAND_SECTION_TERMINATOR	= "";
 const char *WizFi210Class::COMMAND_SEPERATOR			= ",";
 
 WizFi210Class::WizFi210Class() {
- 	_connected = false;
- 	_inDataMode = false;
  	_transport = SC16SpiTransport(DEFAULT_CHIP_SELECT, SC16IS740_BAUDRATE.B115200);
  	pinMode(N_ASSOCIATE, INPUT);
  	pinMode(N_WIFI_OK, INPUT);
@@ -61,12 +59,6 @@ bool WizFi210Class::initialise() {
 void WizFi210Class::sendCommand(const char *command, ...) {
 	va_list commands;
 
-	bool wasInDataMode = _inDataMode;
-	// If where in datamode, disable first
-	if(_inDataMode) {
-		escapeDataMode();
-	}
-	
   	_transport.select();
   	_transport.prepareWrite();
 
@@ -83,11 +75,6 @@ void WizFi210Class::sendCommand(const char *command, ...) {
 	}
 	va_end(commands);
   	_transport.deselect();
-  	
-  	// If we were in datamode, get back into it
-  	if(wasInDataMode) {
-  		enterDataMode();
-  	}  
 }
 
 size_t WizFi210Class::write(const uint8_t byte) {
@@ -281,27 +268,18 @@ bool WizFi210Class::setNetworkParameters(uint8_t *address, uint8_t *netMask, uin
 }
 
 void WizFi210Class::enterDataMode() {
-	if(_inDataMode) {
-		return;
-	}
-
 	if(DEBUG) Serial.print("Entering data mode");
 	sendCommand("ATO", COMMAND_TERMINATOR);
-	_inDataMode = isOk(receiveResponse());
+	isOk(receiveResponse());
 }
 
 void WizFi210Class::escapeDataMode() {
-	if(!_inDataMode) {
-		return;
-	}
-
 	if(DEBUG) Serial.println("Escaping data mode");
 	write("+++");
 	// No new line, so put new line for logging purposes
 	if(DEBUG) Serial.println();
 	// Delay of one second to exit data mode
 	delay(2000);
-	_inDataMode = false;
 	read();
 	write(COMMAND_TERMINATOR);
 	read();
@@ -334,15 +312,13 @@ void WizFi210Class::setAutoTcpListen(int port) {
 
 bool WizFi210Class::autoAssociateAndConnect() {
 	sendCommand("ATA", COMMAND_TERMINATOR);
-	_connected = isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
-	_inDataMode = _connected;
-	return _connected;
+	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 }
  
 
 void WizFi210Class::closeAllConnections() {
 	sendCommand("AT+NCLOSEALL", COMMAND_TERMINATOR);
-	_connected = !isOk(receiveResponse());
+	isOk(receiveResponse());
 }
 
 bool WizFi210Class::connected() {
