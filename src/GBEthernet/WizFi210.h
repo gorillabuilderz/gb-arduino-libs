@@ -109,21 +109,21 @@ class WizFi210Class : public Stream
 
     WizFi210Class();
     
-    void reset();
-    bool initialise();
-    void sendCommand(const char *command, ...);
     size_t write(const char *string);
     size_t write(const uint8_t byte);
     size_t write(const uint8_t *buffer, size_t size);
+    int available();
+    int read();
+    int peek() { return 0; };
+    void flush() {};
+    
+    void reset();
+    bool initialise();
+    void sendCommand(const char *command, ...);
     bool connected();
     bool associated();
-	int available();
-	int read();
-	int peek();
-	void flush() {};
-    
+
     char receiveResponse(char expectedResponse = -1);
-    
     bool isOk(char response);
     
     // Keep things transparent to the application

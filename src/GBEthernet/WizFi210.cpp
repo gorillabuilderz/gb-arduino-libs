@@ -52,7 +52,7 @@ bool WizFi210Class::initialise() {
 
   	// Enalbe hardware flow control
   	sendCommand("AT&R1", COMMAND_TERMINATOR);
-  	// TODO Hang or continue and return false?
+  	// Return response result
   	return isOk(receiveResponse());
 }
 
@@ -100,7 +100,7 @@ size_t WizFi210Class::write(const char *string) {
 }
 
 size_t WizFi210Class::write(const uint8_t *buffer, size_t size) {
-  	for(int index = 0; index < size; index++) {
+  	for(size_t index = 0; index < size; index++) {
 //  		Serial.print(buffer[index], HEX);
 		// TODO Is not printing bytes quite correctly
 //  		if(DEBUG) { Serial.write(buffer[index]); }
@@ -116,9 +116,6 @@ int WizFi210Class::available() {
 	available = _transport.available();
 	_transport.deselect();
 	return available;
-}
-
-int WizFi210Class::peek() {
 }
 
 int WizFi210Class::read() {
@@ -143,7 +140,7 @@ char WizFi210Class::receiveResponse(char expectedResponse) {
 
   	_transport.select();
   	while(timeout > millis()) {
-    	if(available = _transport.available()) {
+    	if((available = _transport.available())) {
     		// Extend the timeout, modem is responding
     		timeout = millis() + TIMEOUT;
     		
@@ -153,6 +150,9 @@ char WizFi210Class::receiveResponse(char expectedResponse) {
       		_transport.prepareRead();
       		for(int index = 0; index < available; index++) {
         		response = _transport.read();
+
+        		// NOTE: We are clearing out the buffer before checking for valid response. This is generally ok as the modem
+        		//		 always ends with a response. This will become an issue if there is a scenario that meet this requirement
         		_responseHandler.putByte(response);
         		if(DEBUG) {
         			Serial.print(response);
