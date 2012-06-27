@@ -64,6 +64,8 @@ EthernetClient EthernetServer::available()
 //  }
 //
 //  return EthernetClient(MAX_SOCK_NUM);
+	// TODO Implement
+	return NULL;
 }
 
 size_t EthernetServer::write(uint8_t b) {
@@ -72,18 +74,5 @@ size_t EthernetServer::write(uint8_t b) {
 
 size_t EthernetServer::write(const uint8_t *buffer, size_t size)
 {
-//  size_t n = 0;
-//
-//  accept();
-//
-//  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
-//    EthernetClient client(sock);
-//
-//    if (EthernetClass::_server_port[sock] == _port &&
-//      client.status() == SnSR::ESTABLISHED) {
-//      n += client.write(buffer, size);
-//    }
-//  }
-//
-//  return n;
+	return WizFi210.write(buffer, size);
 }

@@ -20,10 +20,11 @@ EthernetClient::EthernetClient(uint8_t sock) : _sock(sock) {
 }
 
 int EthernetClient::connect(const char* host, uint16_t port) {
-	// TODO Implement correctly
+	// TODO Implement correctly, with DNS lookup
 //	IPAddress ip
 	// WizFi210.lookup();
 //	connect(ip, port);
+	return 0;
 }
 
 int EthernetClient::connect(IPAddress ip, uint16_t port) {

@@ -33,7 +33,7 @@ private:
   static uint16_t _srcport;
   static const long CONNECTED_TIMEOUT	= 3000;
   static const long INITIAL_TIMEOUT	= 15000;
-  long readConnectedTimeout;
+  unsigned long readConnectedTimeout;
   uint8_t _sock;
 };
 
