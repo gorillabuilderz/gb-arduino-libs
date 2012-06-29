@@ -107,7 +107,8 @@ class WizFi210Class : public Stream
   	static const char *COMMAND_SECTION_TERMINATOR;
   	static const char *COMMAND_SEPERATOR;
 
-    WizFi210Class();
+    WizFi210Class(uint8_t resetPin = RESET_PIN, uint8_t chipSelectPin = DEFAULT_CHIP_SELECT,
+    		uint8_t associatePin = N_ASSOCIATE, uint8_t wifiOkPin = N_WIFI_OK);
     
     size_t write(const char *string);
     size_t write(const uint8_t byte);
@@ -158,8 +159,12 @@ class WizFi210Class : public Stream
   	static const uint8_t N_ASSOCIATE   			= 5;
   	static const uint8_t N_WIFI_OK     			= 6;
   	static const unsigned long TIMEOUT 			= 15000;
+
+  	uint8_t _resetPin;
+  	uint8_t _associatePin;
+  	uint8_t _wifiOkPin;
+
   	ResponseCodeHandler _responseHandler;
-  
   	SC16SpiTransport _transport;
   	
   	void writeIP(uint8_t *ip);

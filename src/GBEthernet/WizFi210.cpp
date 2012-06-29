@@ -10,20 +10,22 @@ const char *WizFi210Class::COMMAND_TERMINATOR			= "\n";
 const char *WizFi210Class::COMMAND_SECTION_TERMINATOR	= "";
 const char *WizFi210Class::COMMAND_SEPERATOR			= ",";
 
-WizFi210Class::WizFi210Class() {
- 	_transport = SC16SpiTransport(DEFAULT_CHIP_SELECT, SC16IS740_BAUDRATE.B115200);
- 	pinMode(N_ASSOCIATE, INPUT);
- 	pinMode(N_WIFI_OK, INPUT);
+WizFi210Class::WizFi210Class(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin, uint8_t wifiOkPin)
+	: _resetPin(resetPin), _associatePin(associatePin), _wifiOkPin(wifiOkPin) {
+
+ 	_transport = SC16SpiTransport(chipSelectPin, SC16IS740_BAUDRATE.B115200);
+ 	pinMode(_associatePin, INPUT);
+ 	pinMode(_wifiOkPin, INPUT);
 }
 
 void WizFi210Class::reset() {
 	if(DEBUG) Serial.println("Modem reset");
 		  
-  	pinMode(RESET_PIN, OUTPUT);
-  	digitalWrite(RESET_PIN, HIGH);    
-  	digitalWrite(RESET_PIN, LOW);  
+  	pinMode(_resetPin, OUTPUT);
+  	digitalWrite(_resetPin, HIGH);
+  	digitalWrite(_resetPin, LOW);
   	delay(200);
-  	digitalWrite(RESET_PIN, HIGH);    
+  	digitalWrite(_resetPin, HIGH);
   	delay(7000);
 }
 
@@ -44,9 +46,11 @@ bool WizFi210Class::initialise() {
 	sendCommand("ATV0", COMMAND_TERMINATOR);
 	receiveResponse();
 
-	// Disable echo
-//	sendCommand("ATE0", COMMAND_TERMINATOR);
-//	receiveResponse();
+	if(!DEBUG) {
+		// Disable echo
+		sendCommand("ATE0", COMMAND_TERMINATOR);
+		receiveResponse();
+	}
 	
   	_transport.enableHardwareFlowControl(true);
 
@@ -66,7 +70,6 @@ void WizFi210Class::sendCommand(const char *command, ...) {
 	va_start(commands, command);
   	// Loop through and write out the varargs
 	for (varCommand = command; varCommand != COMMAND_SECTION_TERMINATOR; varCommand = va_arg(commands, char*)) {
-//		if(DEBUG) Serial.print(varCommand);
 		_transport.write(varCommand);
 
 		if(varCommand == COMMAND_TERMINATOR) {
@@ -78,8 +81,6 @@ void WizFi210Class::sendCommand(const char *command, ...) {
 }
 
 size_t WizFi210Class::write(const uint8_t byte) {
-//	if(DEBUG) Serial.print(byte);
-
   	_transport.select();
   	_transport.prepareWrite();
   	size_t written = _transport.write(byte);
@@ -89,8 +90,6 @@ size_t WizFi210Class::write(const uint8_t byte) {
 }
 
 size_t WizFi210Class::write(const char *string) {
-//	if(DEBUG) Serial.print(string);
-	
   	_transport.select();
   	_transport.prepareWrite();
   	size_t written = _transport.write(string);
@@ -101,9 +100,6 @@ size_t WizFi210Class::write(const char *string) {
 
 size_t WizFi210Class::write(const uint8_t *buffer, size_t size) {
   	for(size_t index = 0; index < size; index++) {
-//  		Serial.print(buffer[index], HEX);
-		// TODO Is not printing bytes quite correctly
-//  		if(DEBUG) { Serial.write(buffer[index]); }
   		write(buffer[index]);
   	}
 
@@ -322,7 +318,7 @@ void WizFi210Class::closeAllConnections() {
 }
 
 bool WizFi210Class::connected() {
-	return digitalRead(N_WIFI_OK) == 0;
+	return digitalRead(_wifiOkPin) == 0;
 }
 
 void WizFi210Class::writeIP(uint8_t *ip) {
@@ -350,7 +346,7 @@ void WizFi210Class::writeMAC(uint8_t *mac) {
 }
 
 uint8_t WizFi210Class::getResetPin() {
-	return RESET_PIN;
+	return _resetPin;
 }
 
 Transport *WizFi210Class::getTransport() {
@@ -358,7 +354,7 @@ Transport *WizFi210Class::getTransport() {
 }
 
 bool WizFi210Class::associated() {
-	return digitalRead(N_ASSOCIATE) == 0;
+	return digitalRead(_associatePin) == 0;
 }
 
 void WizFi210Class::tcpConnect(uint8_t *address, int port) {
