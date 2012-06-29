@@ -5,6 +5,7 @@
 #include <IPAddress.h>
 #include "GBEthernetClient.h"
 #include "GBEthernetServer.h"
+#include "WizFi210.h"
 
 #define MAX_SOCK_NUM 4
 
@@ -13,6 +14,8 @@ private:
   IPAddress _dnsServerAddress;
   char *_ssid;
   char *_passphrase;
+  WizFi210* _wizFi;
+
 public:
   static uint8_t _state[MAX_SOCK_NUM];
   static uint16_t _server_port[MAX_SOCK_NUM];
@@ -36,6 +39,11 @@ public:
 
   // Created because it appears IPAddress is friending Client, not EthernetClient
   uint8_t* getRawAddress(IPAddress ipAddress);
+
+  // Allows a user to set their own instance of the WizFi class with their own IO pin selection
+  // Use syntax:
+  // Ethernet.setWizFi(WizFi210::create(resetPin, chipSelectPin, associatePin, wifiOkPin))
+  void setWizFi(WizFi210* wizFi);
 
   friend class EthernetClient;
   friend class EthernetServer;

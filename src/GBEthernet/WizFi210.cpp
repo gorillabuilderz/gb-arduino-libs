@@ -3,14 +3,11 @@
 #include <stdarg.h>
 #include "WizFi210.h"
 
-// Global instance
-WizFi210Class WizFi210;
+const char *WizFi210::COMMAND_TERMINATOR			= "\n";
+const char *WizFi210::COMMAND_SECTION_TERMINATOR	= "";
+const char *WizFi210::COMMAND_SEPERATOR			= ",";
 
-const char *WizFi210Class::COMMAND_TERMINATOR			= "\n";
-const char *WizFi210Class::COMMAND_SECTION_TERMINATOR	= "";
-const char *WizFi210Class::COMMAND_SEPERATOR			= ",";
-
-WizFi210Class::WizFi210Class(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin, uint8_t wifiOkPin)
+WizFi210::WizFi210(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin, uint8_t wifiOkPin)
 	: _resetPin(resetPin), _associatePin(associatePin), _wifiOkPin(wifiOkPin) {
 
  	_transport = SC16SpiTransport(chipSelectPin, SC16IS740_BAUDRATE.B115200);
@@ -18,7 +15,15 @@ WizFi210Class::WizFi210Class(uint8_t resetPin, uint8_t chipSelectPin, uint8_t as
  	pinMode(_wifiOkPin, INPUT);
 }
 
-void WizFi210Class::reset() {
+WizFi210 *WizFi210::create(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin, uint8_t wifiOkPin) {
+	return _instance = new WizFi210(resetPin, chipSelectPin, associatePin, wifiOkPin);
+}
+
+WizFi210 *WizFi210::getInstance() {
+	return _instance;
+}
+
+void WizFi210::reset() {
 	if(DEBUG) Serial.println("Modem reset");
 		  
   	pinMode(_resetPin, OUTPUT);
@@ -29,7 +34,7 @@ void WizFi210Class::reset() {
   	delay(7000);
 }
 
-bool WizFi210Class::initialise() {
+bool WizFi210::initialise() {
 	reset();
 	
 	if(!_transport.initialise()) {
@@ -60,7 +65,7 @@ bool WizFi210Class::initialise() {
   	return isOk(receiveResponse());
 }
 
-void WizFi210Class::sendCommand(const char *command, ...) {
+void WizFi210::sendCommand(const char *command, ...) {
 	va_list commands;
 
   	_transport.select();
@@ -80,7 +85,7 @@ void WizFi210Class::sendCommand(const char *command, ...) {
   	_transport.deselect();
 }
 
-size_t WizFi210Class::write(const uint8_t byte) {
+size_t WizFi210::write(const uint8_t byte) {
   	_transport.select();
   	_transport.prepareWrite();
   	size_t written = _transport.write(byte);
@@ -89,7 +94,7 @@ size_t WizFi210Class::write(const uint8_t byte) {
   	return written;
 }
 
-size_t WizFi210Class::write(const char *string) {
+size_t WizFi210::write(const char *string) {
   	_transport.select();
   	_transport.prepareWrite();
   	size_t written = _transport.write(string);
@@ -98,7 +103,7 @@ size_t WizFi210Class::write(const char *string) {
   	return written;
 }
 
-size_t WizFi210Class::write(const uint8_t *buffer, size_t size) {
+size_t WizFi210::write(const uint8_t *buffer, size_t size) {
   	for(size_t index = 0; index < size; index++) {
   		write(buffer[index]);
   	}
@@ -106,7 +111,7 @@ size_t WizFi210Class::write(const uint8_t *buffer, size_t size) {
   	return size;
 }
 
-int WizFi210Class::available() {
+int WizFi210::available() {
 	int available;
 	_transport.select();
 	available = _transport.available();
@@ -114,7 +119,7 @@ int WizFi210Class::available() {
 	return available;
 }
 
-int WizFi210Class::read() {
+int WizFi210::read() {
 	int read;
 	_transport.select();
     _transport.prepareRead();
@@ -123,11 +128,11 @@ int WizFi210Class::read() {
 	return read;      
 }
 
-bool WizFi210Class::isOk(char response) {
+bool WizFi210::isOk(char response) {
 	return response == MODEM_RESPONSE_CODES::OK;
 }
 
-char WizFi210Class::receiveResponse(char expectedResponse) {
+char WizFi210::receiveResponse(char expectedResponse) {
 	unsigned long timeout = millis() + TIMEOUT;
   
   	char response = -1;
@@ -219,39 +224,39 @@ char WizFi210Class::receiveResponse(char expectedResponse) {
   	return response;
 }
 
-void WizFi210Class::setMac(uint8_t *mac) {
+void WizFi210::setMac(uint8_t *mac) {
 	sendCommand("AT+NMAC=", COMMAND_SECTION_TERMINATOR);
 	writeMAC(mac);
 	sendCommand(COMMAND_TERMINATOR);
 	receiveResponse();
 }
 
-bool WizFi210Class::setWPAPSK(const char* SSID, const char* passphrase) {
+bool WizFi210::setWPAPSK(const char* SSID, const char* passphrase) {
 	sendCommand("AT+WPAPSK=", SSID, COMMAND_SEPERATOR, passphrase, COMMAND_TERMINATOR);
   	return isOk(receiveResponse());
 }
 
-void WizFi210Class::disassociate() {
+void WizFi210::disassociate() {
   sendCommand("AT+WD", COMMAND_TERMINATOR);
   receiveResponse();
 }
 
-bool WizFi210Class::associate(const char* SSID) {
+bool WizFi210::associate(const char* SSID) {
   	sendCommand("AT+WA=", SSID, COMMAND_TERMINATOR);
   	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 }
 
-bool WizFi210Class::setAutoAssociate(const char* SSID) {
+bool WizFi210::setAutoAssociate(const char* SSID) {
   	sendCommand("AT+WAUTO=0,", SSID, COMMAND_TERMINATOR);
 	return isOk(receiveResponse());
 }
 
-bool WizFi210Class::enableDHCP(bool enable) {
+bool WizFi210::enableDHCP(bool enable) {
 	sendCommand("AT+NDHCP=", enable ? "1" : "0", COMMAND_TERMINATOR);
 	return isOk(receiveResponse());
 }
 
-bool WizFi210Class::setNetworkParameters(uint8_t *address, uint8_t *netMask, uint8_t *gateway) {
+bool WizFi210::setNetworkParameters(uint8_t *address, uint8_t *netMask, uint8_t *gateway) {
 	sendCommand("AT+NSET=", COMMAND_SECTION_TERMINATOR);
 	writeIP(address);
 	sendCommand(COMMAND_SEPERATOR, COMMAND_SECTION_TERMINATOR);
@@ -263,13 +268,13 @@ bool WizFi210Class::setNetworkParameters(uint8_t *address, uint8_t *netMask, uin
 	return isOk(receiveResponse());
 }
 
-void WizFi210Class::enterDataMode() {
+void WizFi210::enterDataMode() {
 	if(DEBUG) Serial.print("Entering data mode");
 	sendCommand("ATO", COMMAND_TERMINATOR);
 	isOk(receiveResponse());
 }
 
-void WizFi210Class::escapeDataMode() {
+void WizFi210::escapeDataMode() {
 	if(DEBUG) Serial.println("Escaping data mode");
 	write("+++");
 	// No new line, so put new line for logging purposes
@@ -290,7 +295,7 @@ void WizFi210Class::escapeDataMode() {
 	receiveResponse();
 }
 
-void WizFi210Class::setAutoTcpConnect(uint8_t *address, int port) {
+void WizFi210::setAutoTcpConnect(uint8_t *address, int port) {
   	sendCommand("AT+NAUTO=0,1,", COMMAND_SECTION_TERMINATOR);
   	writeIP(address),
   	sendCommand(COMMAND_SEPERATOR, COMMAND_SECTION_TERMINATOR);
@@ -299,29 +304,29 @@ void WizFi210Class::setAutoTcpConnect(uint8_t *address, int port) {
 	receiveResponse();
 }
 
-void WizFi210Class::setAutoTcpListen(int port) {
+void WizFi210::setAutoTcpListen(int port) {
   	sendCommand("AT+NAUTO=1,1,,", COMMAND_SECTION_TERMINATOR);
   	print(port);
   	sendCommand(COMMAND_TERMINATOR);
 	receiveResponse();
 }
 
-bool WizFi210Class::autoAssociateAndConnect() {
+bool WizFi210::autoAssociateAndConnect() {
 	sendCommand("ATA", COMMAND_TERMINATOR);
 	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 }
  
 
-void WizFi210Class::closeAllConnections() {
+void WizFi210::closeAllConnections() {
 	sendCommand("AT+NCLOSEALL", COMMAND_TERMINATOR);
 	isOk(receiveResponse());
 }
 
-bool WizFi210Class::connected() {
+bool WizFi210::connected() {
 	return digitalRead(_wifiOkPin) == 0;
 }
 
-void WizFi210Class::writeIP(uint8_t *ip) {
+void WizFi210::writeIP(uint8_t *ip) {
 	print(ip[0], DEC);
 	write(".");
 	print(ip[1], DEC);
@@ -331,7 +336,7 @@ void WizFi210Class::writeIP(uint8_t *ip) {
 	print(ip[3], DEC);
 }
 
-void WizFi210Class::writeMAC(uint8_t *mac) {
+void WizFi210::writeMAC(uint8_t *mac) {
 	print(mac[0], HEX);
 	write(":");
 	print(mac[1], HEX);
@@ -345,19 +350,19 @@ void WizFi210Class::writeMAC(uint8_t *mac) {
 	print(mac[5], HEX);
 }
 
-uint8_t WizFi210Class::getResetPin() {
+uint8_t WizFi210::getResetPin() {
 	return _resetPin;
 }
 
-Transport *WizFi210Class::getTransport() {
+Transport *WizFi210::getTransport() {
 	return &_transport;
 }
 
-bool WizFi210Class::associated() {
+bool WizFi210::associated() {
 	return digitalRead(_associatePin) == 0;
 }
 
-void WizFi210Class::tcpConnect(uint8_t *address, int port) {
+void WizFi210::tcpConnect(uint8_t *address, int port) {
   	sendCommand("AT+NCTCP=", COMMAND_SECTION_TERMINATOR);
   	writeIP(address),
   	sendCommand(COMMAND_SEPERATOR, COMMAND_SECTION_TERMINATOR);

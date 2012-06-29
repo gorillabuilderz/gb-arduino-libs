@@ -16,24 +16,33 @@ int EthernetClass::begin(uint8_t *mac_address)
 		return 0;
 	}
 
+	// Is the wizfi holding an instance?? Get that. The user must have created it earlier
+	_wizFi = WizFi210::getInstance();
+
+	// If we don't have a modem instance set, create with defaults
+	if(_wizFi == NULL) {
+		// Create the default
+		_wizFi = WizFi210::create();
+	}
+
 	// Initialise the modem
-	if(!WizFi210.initialise()) {
+	if(!_wizFi->initialise()) {
 		return 0;
 	}
 
 	// If the password is set, setup the passphrase
 	if(_passphrase != NULL) {
-		WizFi210.setWPAPSK(_ssid, _passphrase);
+		_wizFi->setWPAPSK(_ssid, _passphrase);
 	}
 
 	// Set auto associate with the desired network
-	WizFi210.setAutoAssociate(_ssid);
+	_wizFi->setAutoAssociate(_ssid);
 
-	WizFi210.setMac(mac_address);
-	WizFi210.enableDHCP(true);
+	_wizFi->setMac(mac_address);
+	_wizFi->enableDHCP(true);
 
 	// Associate to the network here...
-	return WizFi210.associate(_ssid);
+	return _wizFi->associate(_ssid);
 }
 
 void EthernetClass::begin(uint8_t *mac_address, IPAddress local_ip)
@@ -64,10 +73,10 @@ void EthernetClass::begin(uint8_t *mac, IPAddress local_ip, IPAddress dns_server
 {
 	_dnsServerAddress = dns_server;
 
-	WizFi210.initialise();
+	_wizFi->initialise();
 
-	WizFi210.setMac(mac);
-	WizFi210.setNetworkParameters(local_ip.raw_address(), subnet.raw_address(), gateway.raw_address());
+	_wizFi->setMac(mac);
+	_wizFi->setNetworkParameters(local_ip.raw_address(), subnet.raw_address(), gateway.raw_address());
 }
 
 IPAddress EthernetClass::localIP()
@@ -109,4 +118,8 @@ void EthernetClass::ssid(char *ssid) {
 
 uint8_t* EthernetClass::getRawAddress(IPAddress ipAddress) {
 	return ipAddress.raw_address();
+}
+
+void EthernetClass::setWizFi(WizFi210 *wizFi) {
+	_wizFi = wizFi;
 }

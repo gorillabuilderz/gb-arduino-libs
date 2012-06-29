@@ -74,5 +74,5 @@ size_t EthernetServer::write(uint8_t b) {
 
 size_t EthernetServer::write(const uint8_t *buffer, size_t size)
 {
-	return WizFi210.write(buffer, size);
+	return WizFi210::getInstance()->write(buffer, size);
 }

@@ -23,7 +23,10 @@ SC16SpiTransport transport(CHIP_SELECT_PIN, SC16IS740_BAUDRATE.B115200);
 // Initialise the SPI driver using the default chip select. 
 // NOTE: Remember to have the UART/SPI switch on SPI when uploading this sketch and running it
 //       using the SPI driver!
-//WizFi210 wizfi(CHIP_SELECT_PIN);
+//WizFi210 wizFi;
+// Redefine your IO here
+// resetPin, chipSelectPin, associatePin, wifiOkPin
+WizFi210 wizFi(A1, 2, 5, 6);
 
 void setup() {
   delay(3000);
@@ -48,10 +51,10 @@ void setup() {
 
   Serial.println();
   Serial.print("Initialising Module using reset: ");
-  Serial.println(WizFi210.getResetPin());
+  Serial.println(wizFi.getResetPin());
   Serial.println("...");
   
-  if(WizFi210.initialise()) {
+  if(wizFi.initialise()) {
     Serial.println("Success!");
   }
   else {
@@ -61,39 +64,39 @@ void setup() {
   }
   
   // WARNING: Mac address must be set in order to associate  
-  WizFi210.setMac(MAC);
-  WizFi210.enableDHCP(true);
-  WizFi210.setWPAPSK(SSID, PASSWORD);
+  wizFi.setMac(MAC);
+  wizFi.enableDHCP(true);
+  wizFi.setWPAPSK(SSID, PASSWORD);
 
-//  if(!WizFi210.associate(SSID)) {
+//  if(!wizFi.associate(SSID)) {
 //    Serial.println("FAILED WiFi Associated");    
 //    return;
 //  }
 //  
 //  Serial.println("WiFi Associated");
-  WizFi210.setAutoAssociate(SSID);
+  wizFi.setAutoAssociate(SSID);
   printStatus();
-  WizFi210.setAutoTcpConnect(SERVER, PORT);
-  WizFi210.autoAssociateAndConnect();
-  WizFi210.println("GET /search?q=arduino HTTP/1.0");
-  WizFi210.println();  
+  wizFi.setAutoTcpConnect(SERVER, PORT);
+  wizFi.autoAssociateAndConnect();
+  wizFi.println("GET /search?q=arduino HTTP/1.0");
+  wizFi.println();  
   printStatus();  
   
 }
 
 void printStatus() {
   Serial.print("Associated: ");
-  Serial.print( WizFi210.associated());
+  Serial.print( wizFi.associated());
   
   Serial.print(", Connected: ");
-  Serial.println( WizFi210.connected());    
+  Serial.println( wizFi.connected());    
 }
 
 void loop() {
   Status.idle();
   
-  if(WizFi210.available()) {
-    char c = WizFi210.read();
+  if(wizFi.available()) {
+    char c = wizFi.read();
     Serial.print(c);  
   }
   else {
