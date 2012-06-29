@@ -18,10 +18,16 @@
 #include <Transport.h>
 #include <WizFi210.h>
 #include <GBEthernet.h>
+// Needed to read the GBIMAC, so you don't have to provide a MAC address....
+#include <GBIMAC.h>
 
 // Enter a MAC address for your controller below.
 // Newer Ethernet shields have a MAC address printed on a sticker on the shield
-byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+//byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+// NOTE: With GorillaBuilderz shield we have a a GBIMAC identifier you can use!
+GBIMAC macReader(A2);
+byte mac[MAC_LENGTH];
+
 IPAddress server(74,125,237,114); // Google
 
 // Initialize the Ethernet client library
@@ -44,6 +50,9 @@ void setup() {
   // Initialise secure network passphrase
   Ethernet.passphrase("password");
 
+  // Read in the GBIMAC address
+  macReader.read(mac);
+  
   // start the Ethernet connection:
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP");
