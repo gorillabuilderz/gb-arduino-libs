@@ -30,6 +30,9 @@ EthernetServer server(80);
 
 void setup()
 {
+  // NOTE: If you need to redefine the IO to your wifi shield call this BEFORE you execute any Ethernet* methods
+  // WizFi210::create(A1, 2, 5, 6);
+
   // start the Ethernet connection and the server:
   Ethernet.begin(mac, ip);
   server.begin();

@@ -22,33 +22,33 @@ EthernetClient::EthernetClient(uint8_t sock) : _sock(sock) {
 int EthernetClient::connect(const char* host, uint16_t port) {
 	// TODO Implement correctly, with DNS lookup
 //	IPAddress ip
-	// WizFi210.lookup();
+	// WizFi210Class::getInstance()->lookup();
 //	connect(ip, port);
 	return 0;
 }
 
 int EthernetClient::connect(IPAddress ip, uint16_t port) {
-	WizFi210.setAutoTcpConnect(Ethernet.getRawAddress(ip), port);
-	bool result = WizFi210.autoAssociateAndConnect();
+	WizFi210::getInstance()->setAutoTcpConnect(Ethernet.getRawAddress(ip), port);
+	bool result = WizFi210::getInstance()->autoAssociateAndConnect();
 	readConnectedTimeout = millis() + INITIAL_TIMEOUT;
 	return result;
 }
 
 size_t EthernetClient::write(uint8_t b) {
-	return WizFi210.write(b);
+	return WizFi210::getInstance()->write(b);
 }
 
 size_t EthernetClient::write(const uint8_t *buf, size_t size) {
-	return WizFi210.write(buf, size);
+	return WizFi210::getInstance()->write(buf, size);
 }
 
 int EthernetClient::available() {
-	return WizFi210.available();
+	return WizFi210::getInstance()->available();
 }
 
 int EthernetClient::read() {
 	readConnectedTimeout = millis() + CONNECTED_TIMEOUT;
-	return WizFi210.read();
+	return WizFi210::getInstance()->read();
 }
 
 int EthernetClient::read(uint8_t *buf, size_t size) {
@@ -73,16 +73,16 @@ void EthernetClient::flush() {
 
 void EthernetClient::stop() {
 	// TODO Don't close all connections, only the one this is associated to
-    WizFi210.escapeDataMode();
-    WizFi210.closeAllConnections();
-    WizFi210.disassociate();
+    WizFi210::getInstance()->escapeDataMode();
+    WizFi210::getInstance()->closeAllConnections();
+    WizFi210::getInstance()->disassociate();
 }
 
 uint8_t EthernetClient::connected() {
 	// Check if wifi is connected
 	// If library thinks it's connected AND we haven't timedout
 	// OR there are bytes available
-	return (WizFi210.connected() && readConnectedTimeout > millis()) || available();
+	return (WizFi210::getInstance()->connected() && readConnectedTimeout > millis()) || available();
 }
 
 uint8_t EthernetClient::status() {

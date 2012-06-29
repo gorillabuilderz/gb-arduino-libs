@@ -100,16 +100,23 @@ private:
 	}
 };
 
-class WizFi210Class : public Stream
+class WizFi210 : public Stream
 {
   public:
   	static const char *COMMAND_TERMINATOR;
   	static const char *COMMAND_SECTION_TERMINATOR;
   	static const char *COMMAND_SEPERATOR;
 
-    WizFi210Class(uint8_t resetPin = RESET_PIN, uint8_t chipSelectPin = DEFAULT_CHIP_SELECT,
+    WizFi210(uint8_t resetPin = RESET_PIN, uint8_t chipSelectPin = DEFAULT_CHIP_SELECT,
     		uint8_t associatePin = N_ASSOCIATE, uint8_t wifiOkPin = N_WIFI_OK);
     
+    /**
+     * Creates an instance of the class, and stores it for use by other classes by getInstance
+     */
+    static WizFi210* create(uint8_t resetPin = RESET_PIN, uint8_t chipSelectPin = DEFAULT_CHIP_SELECT,
+    		uint8_t associatePin = N_ASSOCIATE, uint8_t wifiOkPin = N_WIFI_OK);
+    static WizFi210* getInstance();
+
     size_t write(const char *string);
     size_t write(const uint8_t byte);
     size_t write(const uint8_t *buffer, size_t size);
@@ -160,6 +167,9 @@ class WizFi210Class : public Stream
   	static const uint8_t N_WIFI_OK     			= 6;
   	static const unsigned long TIMEOUT 			= 15000;
 
+  	// Singleton instance
+  	static WizFi210 *_instance;
+
   	uint8_t _resetPin;
   	uint8_t _associatePin;
   	uint8_t _wifiOkPin;
@@ -171,6 +181,6 @@ class WizFi210Class : public Stream
   	void writeMAC(uint8_t *mac);
 };
 
-extern WizFi210Class WizFi210;
+//extern WizFi210Class WizFi210;
 
 #endif
