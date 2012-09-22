@@ -14,7 +14,14 @@
 	<property name="lib" location="lib"/>
 	<property name="lib.arduino-core" location="lib/arduino/${arduino.version}"/>
 	<property name="lib.build" location="lib/build"/>
-	<property name="avr.compile.flags" value="-w -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=${mcu.type} -DF_CPU=${mcu.frequency} -DARDUINO=${arduino.version}" />
+											  
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+	  <classpath>
+	    <pathelement location="${lib.build}/ant-contrib-0.6.jar"/>
+	  </classpath>
+	</taskdef>
+	
+	<property name="avr.compile.flags" value="-w -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -DARDUINO=${arduino.version}" />
 	<property name="avr.link.flags" value="-Os -Wl,--gc-sections -mmcu=${mcu.type}" />
 	
 	<target name="hudson-version" if="env.JOB_NAME">
@@ -78,58 +85,84 @@
 		<pathconvert property="compile.includes" refid="compile.includes.path" pathsep=" -I" />
 		
 		<mkdir dir="${bin}" />
-		<!-- Create empty directory set -->
-		<copy todir="${bin}">
-			<dirset dir="${src}"/>
-		</copy>
 		
-		<!-- Compile the sketches
+		<!-- Get all the mcu types we want to build -->
+		<propertyselector property="mcu.types"
+			delimiter=","
+			match="mcu\.type\.(.*)"
+			select="\1"
+			casesensitive="false"/>
 		
-		TODO: Add Arduino.h to file
-		TODO: Add method prototypes after Arduino.h just as the ide does 
-		TODO: Remove the manual .h file includes
-		-->
-		<copy todir="${bin}">
-			<fileset dir="${src}" includes=" **/*.pde **/*.ino"/>
-			<mapper type="regexp" from="^(.*)\.(pde|ino)" to="\1.cpp"/>
-		</copy>
-		
-		<apply executable="avr-g++" dest="${bin}" parallel="false" failonerror="true">
-			<arg line="${avr.compile.flags}"/>
-			<arg line="-I${compile.includes}"/>
-			<srcfile/>
-			<arg value="-o"/><targetfile/>
-			<fileset dir="${bin}" includes="**/*.cpp" />
-			<mapper type="glob" from="*.cpp" to="*.cpp.o"/>
-		</apply>
-		
-		<!-- Compile the libraries -->
-		<apply executable="avr-g++" dest="${bin}" failonerror="true">
-			<arg line="${avr.compile.flags}"/>
-			<arg line="-I${compile.includes}"/>
-			<arg value="-o"/><targetfile/> <srcfile/>
-			<fileset dir="${src}" includes="**/*.cpp" />
-			<mapper type="glob" from="*.cpp" to="*.o"/>
-		</apply>
-
-		
-		<!--
-		# To Link:
-		# avr-gcc -Os -Wl,-gc-sections -mmcu=atmega328p -o /tmp/build7047812164273774237.tmp/GB4DLcd1Verify.cpp.elf /tmp/build7047812164273774237.tmp/GB4DLcd1Verify.cpp.o /tmp/build7047812164273774237.tmp/GBStatus/GBStatus.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SerialTransport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SpiTransport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/Transport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SC16SpiTransport.cpp.o /tmp/build7047812164273774237.tmp/GB4DLcdDriver/GB4DLcdDriver.cpp.o /tmp/build7047812164273774237.tmp/GB4DLcdDriver/Console.cpp.o /tmp/build7047812164273774237.tmp/SPI/SPI.cpp.o /tmp/build7047812164273774237.tmp/GBIMAC/GBIMAC.cpp.o /tmp/build7047812164273774237.tmp/SD/SD.cpp.o /tmp/build7047812164273774237.tmp/SD/File.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/SdFile.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/Sd2Card.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/SdVolume.cpp.o /tmp/build7047812164273774237.tmp/core.a -L/tmp/build7047812164273774237.tmp -lm
-		<path id="link.includes.path">
-			<fileset dir="${bin}" includes="**/*.o" />
-			<fileset dir="${lib.arduino-core}" includes="**/*.a"/>
-		</path>
-		
-		<pathconvert property="link.includes" refid="link.includes.path" pathsep=" " />
-		<exec executable="avr-gcc" failonerror="true">
-			<arg line="${avr.link.flags}"/>
-			<arg value="${link.includes}"/>
-			<arg value="-L${bin}"/>
-			<arg value="-lm"/>
-		</exec>
-		-->
+		<!-- Build each type -->
+		<for list="${mcu.types}" param="mcu.type">
+			<sequential>
+				<compile-mcu type="@{mcu.type}" params="${mcu.type.@{mcu.type}}"/>
+			</sequential>
+		</for>
 	</target>
 	
 	<target name="cts-int" depends="compile"/>
+	
+	<macrodef name="compile-mcu">
+		<attribute name="type" default=""/>
+		<attribute name="params" default=""/>
+		<sequential>
+			<echo>Compiling For: @{type}</echo>
+			<echo>Parameters: '@{params}'</echo>
+			<mkdir dir="${bin}/@{type}" />
+			<!-- Create empty directory set -->
+			<copy todir="${bin}/@{type}">
+				<dirset dir="${src}"/>
+			</copy>
+			
+			<!-- Compile the sketches
+			
+			TODO: Add Arduino.h to file
+			TODO: Add method prototypes after Arduino.h just as the ide does 
+			TODO: Remove the manual .h file includes
+			-->
+			<copy todir="${bin}/@{type}">
+				<fileset dir="${src}" includes=" **/*.pde **/*.ino"/>
+				<mapper type="regexp" from="^(.*)\.(pde|ino)" to="\1.cpp"/>
+			</copy>
+			
+			<apply executable="avr-g++" dest="${bin}/@{type}" parallel="false" failonerror="true">
+				<arg line="${avr.compile.flags}"/>
+				<arg line="@{params}"/>
+				<arg line="-I${compile.includes}"/>
+				<srcfile/>
+				<arg value="-o"/><targetfile/>
+				<fileset dir="${bin}/@{type}" includes="**/*.cpp" />
+				<mapper type="glob" from="*.cpp" to="*.cpp.o"/>
+			</apply>
+			
+			<!-- Compile the libraries -->
+			<apply executable="avr-g++" dest="${bin}/@{type}" failonerror="true">
+				<arg line="${avr.compile.flags}"/>
+				<arg line="@{params}"/>
+				<arg line="-I${compile.includes}"/>
+				<arg value="-o"/><targetfile/> <srcfile/>
+				<fileset dir="${src}" includes="**/*.cpp" />
+				<mapper type="glob" from="*.cpp" to="*.o"/>
+			</apply>
+	
+			
+			<!--
+			# To Link:
+			# avr-gcc -Os -Wl,-gc-sections -mmcu=atmega328p -o /tmp/build7047812164273774237.tmp/GB4DLcd1Verify.cpp.elf /tmp/build7047812164273774237.tmp/GB4DLcd1Verify.cpp.o /tmp/build7047812164273774237.tmp/GBStatus/GBStatus.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SerialTransport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SpiTransport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/Transport.cpp.o /tmp/build7047812164273774237.tmp/GBTransport/SC16SpiTransport.cpp.o /tmp/build7047812164273774237.tmp/GB4DLcdDriver/GB4DLcdDriver.cpp.o /tmp/build7047812164273774237.tmp/GB4DLcdDriver/Console.cpp.o /tmp/build7047812164273774237.tmp/SPI/SPI.cpp.o /tmp/build7047812164273774237.tmp/GBIMAC/GBIMAC.cpp.o /tmp/build7047812164273774237.tmp/SD/SD.cpp.o /tmp/build7047812164273774237.tmp/SD/File.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/SdFile.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/Sd2Card.cpp.o /tmp/build7047812164273774237.tmp/SD/utility/SdVolume.cpp.o /tmp/build7047812164273774237.tmp/core.a -L/tmp/build7047812164273774237.tmp -lm
+			<path id="link.includes.path">
+				<fileset dir="${bin}/@{type}" includes="**/*.o" />
+				<fileset dir="${lib.arduino-core}" includes="**/*.a"/>
+			</path>
+			
+			<pathconvert property="link.includes" refid="link.includes.path" pathsep=" " />
+			<exec executable="avr-gcc" failonerror="true">
+				<arg line="${avr.link.flags}"/>
+				<arg value="${link.includes}"/>
+				<arg value="-L${bin}/@{type}"/>
+				<arg value="-lm"/>
+			</exec>
+			-->
+	   </sequential>
+	</macrodef>	
 </project>
