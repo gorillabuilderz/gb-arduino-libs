@@ -6,6 +6,7 @@
 const char *WizFi210::COMMAND_TERMINATOR			= "\n";
 const char *WizFi210::COMMAND_SECTION_TERMINATOR	= "";
 const char *WizFi210::COMMAND_SEPERATOR			= ",";
+WizFi210 *WizFi210::_instance;
 
 WizFi210::WizFi210(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin, uint8_t wifiOkPin)
 	: _resetPin(resetPin), _associatePin(associatePin), _wifiOkPin(wifiOkPin) {
@@ -16,11 +17,11 @@ WizFi210::WizFi210(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin
 }
 
 WizFi210 *WizFi210::create(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin, uint8_t wifiOkPin) {
-	return _instance = new WizFi210(resetPin, chipSelectPin, associatePin, wifiOkPin);
+	return WizFi210::_instance = new WizFi210(resetPin, chipSelectPin, associatePin, wifiOkPin);
 }
 
 WizFi210 *WizFi210::getInstance() {
-	return _instance;
+	return WizFi210::_instance;
 }
 
 void WizFi210::reset() {
@@ -289,9 +290,7 @@ void WizFi210::escapeDataMode() {
 	write(COMMAND_TERMINATOR);
 	read();
 
-  	sendCommand("AT", COMMAND_TERMINATOR);
-	receiveResponse();
-  	sendCommand("AT", COMMAND_TERMINATOR);
+	sendCommand("ATV0", COMMAND_TERMINATOR);
 	receiveResponse();
 }
 
@@ -315,7 +314,11 @@ bool WizFi210::autoAssociateAndConnect() {
 	sendCommand("ATA", COMMAND_TERMINATOR);
 	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 }
- 
+
+bool WizFi210::autoConnectExistingAssociation() {
+	sendCommand("ATA2", COMMAND_TERMINATOR);
+	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
+}
 
 void WizFi210::closeAllConnections() {
 	sendCommand("AT+NCLOSEALL", COMMAND_TERMINATOR);
@@ -337,17 +340,18 @@ void WizFi210::writeIP(uint8_t *ip) {
 }
 
 void WizFi210::writeMAC(uint8_t *mac) {
-	print(mac[0], HEX);
-	write(":");
-	print(mac[1], HEX);
-	write(":");
-	print(mac[2], HEX);
-	write(":");
-	print(mac[3], HEX);
-	write(":");
-	print(mac[4], HEX);
-	write(":");
-	print(mac[5], HEX);
+	for(int index; index < 6; index++) {
+		// Add a leading 0 if 16 or less
+		if(mac[index] <= 16) {
+			print(0, HEX);
+		}
+
+		print(mac[index], HEX);
+
+		if(index < 5) {
+			write(":");
+		}
+	}
 }
 
 uint8_t WizFi210::getResetPin() {
@@ -362,11 +366,11 @@ bool WizFi210::associated() {
 	return digitalRead(_associatePin) == 0;
 }
 
-void WizFi210::tcpConnect(uint8_t *address, int port) {
+bool WizFi210::tcpConnect(uint8_t *address, int port) {
   	sendCommand("AT+NCTCP=", COMMAND_SECTION_TERMINATOR);
   	writeIP(address),
   	sendCommand(COMMAND_SEPERATOR, COMMAND_SECTION_TERMINATOR);
   	print(port, DEC);
   	sendCommand(COMMAND_TERMINATOR);
-	receiveResponse();
+	return isOk(receiveResponse());
 }

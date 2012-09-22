@@ -21,17 +21,14 @@ EthernetClient::EthernetClient(uint8_t sock) : _sock(sock) {
 
 int EthernetClient::connect(const char* host, uint16_t port) {
 	// TODO Implement correctly, with DNS lookup
-//	IPAddress ip
-	// WizFi210Class::getInstance()->lookup();
-//	connect(ip, port);
+	// IPAddress ip(WizFi210Class::getInstance()->lookup());
+	// return connect(ip, port);
 	return 0;
 }
 
 int EthernetClient::connect(IPAddress ip, uint16_t port) {
 	WizFi210::getInstance()->setAutoTcpConnect(Ethernet.getRawAddress(ip), port);
-	bool result = WizFi210::getInstance()->autoAssociateAndConnect();
-	readConnectedTimeout = millis() + INITIAL_TIMEOUT;
-	return result;
+	return WizFi210::getInstance()->autoConnectExistingAssociation();
 }
 
 size_t EthernetClient::write(uint8_t b) {
@@ -79,10 +76,7 @@ void EthernetClient::stop() {
 }
 
 uint8_t EthernetClient::connected() {
-	// Check if wifi is connected
-	// If library thinks it's connected AND we haven't timedout
-	// OR there are bytes available
-	return (WizFi210::getInstance()->connected() && readConnectedTimeout > millis()) || available();
+	return WizFi210::getInstance()->connected();
 }
 
 uint8_t EthernetClient::status() {

@@ -148,7 +148,8 @@ class WizFi210 : public Stream
     void setAutoTcpConnect(uint8_t *address, int port);
     void setAutoTcpListen(int port);
     bool autoAssociateAndConnect();
-    void tcpConnect(uint8_t *address, int port);
+    bool autoConnectExistingAssociation();
+    bool tcpConnect(uint8_t *address, int port);
     void udpConnect(uint8_t *address, int port);
     void udpServer(int port);
     

@@ -35,9 +35,6 @@ int EthernetClass::begin(uint8_t *mac_address)
 		_wizFi->setWPAPSK(_ssid, _passphrase);
 	}
 
-	// Set auto associate with the desired network
-	_wizFi->setAutoAssociate(_ssid);
-
 	_wizFi->setMac(mac_address);
 	_wizFi->enableDHCP(true);
 

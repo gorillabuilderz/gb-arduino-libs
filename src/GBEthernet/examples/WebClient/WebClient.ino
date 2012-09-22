@@ -21,11 +21,8 @@
 // Needed to read the GBIMAC, so you don't have to provide a MAC address....
 #include <GBIMAC.h>
 
-// Enter a MAC address for your controller below.
-// Newer Ethernet shields have a MAC address printed on a sticker on the shield
-//byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // NOTE: With GorillaBuilderz shield we have a a GBIMAC identifier you can use!
-GBIMAC macReader(A2);
+GBIMAC macReader(3);
 byte mac[MAC_LENGTH];
 
 IPAddress server(74,125,237,114); // Google
