@@ -42,8 +42,8 @@ class SC16SpiTransport : public Transport
     int16_t getBaudRate();
     void setBaudRate(int baudRate);
     bool initialise();
+    using Print::write;
     size_t write(uint8_t command);
-    size_t write(const char *string);
     int read();
     void prepareRead();
     void prepareWrite();

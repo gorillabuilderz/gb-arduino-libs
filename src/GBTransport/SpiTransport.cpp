@@ -38,16 +38,6 @@ size_t SpiTransport::write(uint8_t command) {
 	return 1;
 }
 
-size_t SpiTransport::write(const char *string) {
-	unsigned int length = strlen(string);
-	
-	for(int index = 0; index < length; index++) {
-		SPI.transfer(string[index]);
-	}
-
-	return length;
-}
-
 uint8_t SpiTransport::readIfNotByteOnAvailable() {
 	// If no data waiting to be read
 	if(_readByteOnAvailable == 0) {

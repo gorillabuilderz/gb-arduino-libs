@@ -60,16 +60,6 @@ void SC16SpiTransport::writeRegister(uint8_t address, uint8_t data) {
 	SPI.transfer(data);
 }
 
-size_t SC16SpiTransport::write(const char *string) {
-	unsigned int length = strlen(string);
-	
-	for(int index = 0; index < length; index++) {
-		SPI.transfer(string[index]);
-	}
-
-	return length;
-}
-
 int SC16SpiTransport::read() {
 	return SPI.transfer(0x00);
 }

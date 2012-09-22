@@ -12,9 +12,9 @@ class Transport : public Stream
   	Transport(unsigned long timeout = DEFAULT_TIMEOUT);
   	
     virtual bool initialise();
+    // Inherited method overloading
+    using Print::write;
     virtual size_t write(const uint8_t byte) { return 0; };
-    virtual size_t write(const uint8_t *buffer, size_t size);
-    virtual size_t write(const char *string) { return 0; };
     virtual bool waitForData();
     virtual int available();
     virtual int read() { return 0; };

@@ -10,8 +10,8 @@ class SerialTransport : public Transport
     SerialTransport(long baudRate = 9600, unsigned long timeout = Transport::DEFAULT_TIMEOUT);
     
     bool initialise();
+    using Print::write;
     size_t write(uint8_t command);
-    size_t write(const char *string);
     int read();
     int available();
     long getBaudRate();

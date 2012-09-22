@@ -19,10 +19,6 @@ size_t SerialTransport::write(uint8_t command) {
 	return Serial.write(command);
 }
 
-size_t SerialTransport::write(const char *string) {
-	return Serial.write(string);
-}
-
 int SerialTransport::available() {
 	return Serial.available();
 }
