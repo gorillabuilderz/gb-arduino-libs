@@ -65,6 +65,10 @@ If you're interested in running the Ant build yourself, there are a couple of pr
 [libraries]: http://arduino.cc/it/Reference/Libraries  "Arduino Libraries"
 [environment]: http://arduino.cc/en/Guide/Environment "Arduino Environment"
 
+## Documentation
+
+Further documentation can be found at https://github.com/gorillabuilderz/gb-arduino-libs/wiki.
+
 ## Issues
 
 Report issues at https://github.com/gorillabuilderz/gb-arduino-libs/issues.
