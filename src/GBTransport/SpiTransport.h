@@ -13,8 +13,8 @@ class SpiTransport : public Transport
     void setChipSelect(int chipSelect);
     int getChipSelect();
     bool initialise();
+    using Print::write;
     size_t write(const uint8_t command);
-    size_t write(const char *string);
     int read();
     int available();
 	void select();    

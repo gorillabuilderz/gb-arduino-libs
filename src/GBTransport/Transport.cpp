@@ -8,16 +8,6 @@ bool Transport::initialise() {
 	return true;
 }
 
-size_t Transport::write(const uint8_t *buffer, size_t size) {
-	size_t numberWritten = 0;
-
-   	for(int index = 0; index < size; index++) {
-   		numberWritten += write((uint8_t)buffer[index]);
-   	}
-
-   	return numberWritten;
-}
-
 bool Transport::waitForData() {
 	unsigned long timeout = millis() + _timeout;
 
