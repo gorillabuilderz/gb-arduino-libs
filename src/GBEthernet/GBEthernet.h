@@ -16,6 +16,8 @@ private:
   char *_passphrase;
   WizFi210* _wizFi;
 
+  void setupWizFi();
+
 public:
   static uint8_t _state[MAX_SOCK_NUM];
   static uint16_t _server_port[MAX_SOCK_NUM];

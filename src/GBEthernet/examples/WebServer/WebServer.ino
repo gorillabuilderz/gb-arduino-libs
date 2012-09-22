@@ -16,15 +16,16 @@
  */
 
 #include <SPI.h>
+
+// Need to include GorillaBuilderz WizFi Ethernet libraries
+#include <Transport.h>
+#include <WizFi210.h>
 #include <GBEthernet.h>
 // Needed to read the GBIMAC, so you don't have to provide a MAC address....
 #include <GBIMAC.h>
 
-// Enter a MAC address and IP address for your controller below.
-// The IP address will be dependent on your local network:
-//byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // NOTE: With GorillaBuilderz shield we have a a GBIMAC identifier you can use!
-GBIMAC macReader(A2);
+GBIMAC macReader(3);
 byte mac[MAC_LENGTH];
 
 IPAddress ip(192,168,1, 177);
@@ -36,8 +37,19 @@ EthernetServer server(80);
 
 void setup()
 {
+  // start the serial library:
+  Serial.begin(115200);
+  
+  Serial.println("GorillaBuilderz Arduino WebServer for WiFi Shield");
+  Serial.println("Initialising modem and ataching to network...");
+  
   // NOTE: If you need to redefine the IO to your wifi shield call this BEFORE you execute any Ethernet* methods
   // WizFi210::create(A1, 2, 5, 6);
+  
+  // Set the network name
+  Ethernet.ssid("BatPhone");
+  // Initialise secure network passphrase
+  Ethernet.passphrase("password");  
 
   // Read in the GBIMAC address
   macReader.read(mac);
@@ -49,6 +61,7 @@ void setup()
 
 void loop()
 {
+  /*
   // listen for incoming clients
   EthernetClient client = server.available();
   if (client) {
@@ -91,4 +104,7 @@ void loop()
     // close the connection:
     client.stop();
   }
+*/
+  Serial.println("In Loop");
+  delay(1000);
 }
