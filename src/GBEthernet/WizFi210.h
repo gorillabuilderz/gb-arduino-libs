@@ -135,6 +135,7 @@ class WizFi210 : public Stream
     bool isOk(char response);
     
     // Keep things transparent to the application
+    bool wirelessScan();
     void setMac(uint8_t *mac);
     bool setWPAPSK(const char* SSID, const char* passphrase);
     bool associate(String SSID);
@@ -166,7 +167,7 @@ class WizFi210 : public Stream
   	static const uint8_t DEFAULT_CHIP_SELECT 	= 2;
   	static const uint8_t N_ASSOCIATE   			= 5;
   	static const uint8_t N_WIFI_OK     			= 6;
-  	static const unsigned long TIMEOUT 			= 15000;
+  	static const unsigned long TIMEOUT 			= 3000;
 
   	// Singleton instance
   	static WizFi210 *_instance;
@@ -174,6 +175,7 @@ class WizFi210 : public Stream
   	uint8_t _resetPin;
   	uint8_t _associatePin;
   	uint8_t _wifiOkPin;
+  	unsigned long _timeout;
 
   	ResponseCodeHandler _responseHandler;
   	SC16SpiTransport _transport;

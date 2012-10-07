@@ -9,7 +9,7 @@ const char *WizFi210::COMMAND_SEPERATOR			= ",";
 WizFi210 *WizFi210::_instance;
 
 WizFi210::WizFi210(uint8_t resetPin, uint8_t chipSelectPin, uint8_t associatePin, uint8_t wifiOkPin)
-	: _resetPin(resetPin), _associatePin(associatePin), _wifiOkPin(wifiOkPin) {
+	: _resetPin(resetPin), _associatePin(associatePin), _wifiOkPin(wifiOkPin), _timeout(TIMEOUT) {
 
  	_transport = SC16SpiTransport(chipSelectPin, SC16IS740_BAUDRATE.B115200);
  	pinMode(_associatePin, INPUT);
@@ -134,17 +134,18 @@ bool WizFi210::isOk(char response) {
 }
 
 char WizFi210::receiveResponse(char expectedResponse) {
-	unsigned long timeout = millis() + TIMEOUT;
+	unsigned long currentTimeout = millis() + _timeout;
   
   	char response = -1;
   	int available;
   	_responseHandler.reset();
 
-  	_transport.select();
-  	while(timeout > millis()) {
+  	while(currentTimeout > millis()) {
+  		_transport.select();
+
     	if((available = _transport.available())) {
     		// Extend the timeout, modem is responding
-    		timeout = millis() + TIMEOUT;
+    		currentTimeout = millis() + _timeout;
     		
     		_transport.deselect();
       		_transport.select();
@@ -162,9 +163,6 @@ char WizFi210::receiveResponse(char expectedResponse) {
 //        			Serial.print(" ");
         		}
       		}      
-      		_transport.deselect();
-
-      		_transport.select();
 
       		// Dodgy logic to cater for when the modem does not send through a \n0 on connect. Instead terminates
       		// command response with a 0 appended. Makes it hard to decipher if the 0 is part of the IP or the OK code
@@ -172,12 +170,15 @@ char WizFi210::receiveResponse(char expectedResponse) {
 
       		// If expected response is set
       		if(expectedResponse != -1) {
+				_transport.deselect();
+				_transport.select();
 				// If there's more items available, this response is not what we're looking for, we want the
 				// last byte transmitted
 				if(_transport.available() > 0) {
 					response = -1;
 				}
       		}
+      		// Deselect preparing for the next available or method exit
     		_transport.deselect();
 
     		if(expectedResponse == -1) {
@@ -192,16 +193,17 @@ char WizFi210::receiveResponse(char expectedResponse) {
     				break;
     			}
     		}
-			      		
-      		_transport.select();
 		}
+    	else {
+    		_transport.deselect();
+    	}
 	}
 
   	// Lets print the outcome if required
 	if(DEBUG) {
 		Serial.println();
 
-		if(timeout <= millis()) {
+		if(currentTimeout <= millis()) {
 			Serial.println();
 			Serial.println("-- Timed Out");
 			Serial.print("Response was:");
@@ -221,8 +223,16 @@ char WizFi210::receiveResponse(char expectedResponse) {
 			}
 		}
 	}
-  
+
+	// Reset to the default timeout
+  	_timeout = TIMEOUT;
+
   	return response;
+}
+
+bool WizFi210::wirelessScan() {
+	  sendCommand("AT+WS", COMMAND_TERMINATOR);
+	  return isOk(receiveResponse());
 }
 
 void WizFi210::setMac(uint8_t *mac) {
@@ -234,6 +244,8 @@ void WizFi210::setMac(uint8_t *mac) {
 
 bool WizFi210::setWPAPSK(const char* SSID, const char* passphrase) {
 	sendCommand("AT+WPAPSK=", SSID, COMMAND_SEPERATOR, passphrase, COMMAND_TERMINATOR);
+	// A bit longer than standard timeout
+	_timeout = 10000;
   	return isOk(receiveResponse());
 }
 
@@ -244,6 +256,8 @@ void WizFi210::disassociate() {
 
 bool WizFi210::associate(const char* SSID) {
   	sendCommand("AT+WA=", SSID, COMMAND_TERMINATOR);
+  	// This command can take a bit
+  	_timeout = 15000;
   	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 }
 
@@ -312,6 +326,8 @@ void WizFi210::setAutoTcpListen(int port) {
 
 bool WizFi210::autoAssociateAndConnect() {
 	sendCommand("ATA", COMMAND_TERMINATOR);
+	// A little bit longer on the timeout for this command
+	_timeout = 15000;
 	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
 }
 
