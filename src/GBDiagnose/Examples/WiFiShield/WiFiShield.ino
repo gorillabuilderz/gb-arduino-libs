@@ -10,7 +10,7 @@
 
 // Update this to change from default
 static const int CHIP_SELECT_PIN  = 2;
-static const int RESET_PIN  = A1;
+static const int RESET_PIN  = 10;
 char *SSID = "BatPhone";
 char *PASSWORD = "password";
 byte MAC[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -26,7 +26,7 @@ SC16SpiTransport transport(CHIP_SELECT_PIN, SC16IS740_BAUDRATE.B115200);
 //WizFi210 wizFi;
 // Redefine your IO here
 // resetPin, chipSelectPin, associatePin, wifiOkPin
-WizFi210 wizFi(A1, 2, 5, 6);
+WizFi210 wizFi(10, 2, 5, 6);
 
 void setup() {
   delay(3000);
@@ -34,7 +34,11 @@ void setup() {
   Serial.begin(115200);
   Serial.println("\n\r\n\rGorillaBuilderz WiFi Shield Diagnose Tool");
   Serial.println();
-  Serial.print("Chip Select for SPI operations: ");
+  doWiFi();
+}
+
+void doWiFi() {
+  Serial.print("Chip Select for WizFi SPI operations: ");
   Serial.println(CHIP_SELECT_PIN);
   Serial.println();
   Serial.print("Initialising transport to SPI/UART Bridge using chip select: ");
@@ -80,8 +84,7 @@ void setup() {
   wizFi.autoAssociateAndConnect();
   wizFi.println("GET /search?q=arduino HTTP/1.0");
   wizFi.println();  
-  printStatus();  
-  
+  printStatus();    
 }
 
 void printStatus() {

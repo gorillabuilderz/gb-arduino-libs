@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-void printStatus();
-void doWiFi();
+void doTestSD();
+
 void setup();
 void loop();
