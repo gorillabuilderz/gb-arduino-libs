@@ -45,7 +45,7 @@ The modules included in this library:
 * *GBEthernet*: Work in progress support for our WiFi shield
 * *GBDiagnose*: A suit of sketches to assist troubleshooting
 
-![Architecture](../raw/master/docs/Achitecture.png) 
+![Architecture](master/docs/Achitecture.png) 
 
 The best place to start to see general usage of the library is to open up the example sketches included. These can be a basis for your own sketch.
 
