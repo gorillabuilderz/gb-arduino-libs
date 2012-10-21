@@ -52,14 +52,17 @@ struct DISPLAY_FUNCTIONS_MODE_STRUCT {
 extern DISPLAY_FUNCTIONS_MODE_STRUCT DISPLAY_FUNCTIONS_MODE;
 
 struct SGC_COLORS_STRUCT {
-	static const int16_t WHITE 	= 0xFFFF;
-	static const int16_t BLACK 	= 0x0000;
-	static const int16_t RED 	= 0xF800;
-	static const int16_t BLUE 	= 0x001F;
-	static const int16_t GREEN 	= 0x03E0;
-	static const int16_t CYAN   = 0x07FF;
-	static const int16_t YELLOW = 0xFFE0;
-	static const int16_t MAGENTA = 0xF81F;
+	static const int16_t WHITE 	    = 0xFFFF;
+	static const int16_t BLACK 	    = 0x0000;
+	static const int16_t RED 	      = 0xF800;
+	static const int16_t DRK_RED 	  = 0x5000;
+	static const int16_t GREEN 	    = 0x03E0;
+	static const int16_t DRK_GREEN 	= 0x01E0;
+	static const int16_t BLUE 	    = 0x001F;
+	static const int16_t DRK_BLUE   = 0x000A;
+	static const int16_t CYAN       = 0x07FF;
+	static const int16_t YELLOW     = 0xFFE0;
+	static const int16_t MAGENTA    = 0xF81F;
 };
 
 struct SGC_FONT {
