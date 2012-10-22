@@ -47,6 +47,7 @@ struct SGC_COMMANDS_STRUCT {
 struct DISPLAY_FUNCTIONS_MODE_STRUCT {
 	static const uint8_t BACKLIGHT_CONTROL	= 0x00;
 	static const uint8_t TOUCH_CONTROL		= 0x05;
+	static const uint8_t IMAGE_FORMAT		= 0x06;
 };
 
 extern DISPLAY_FUNCTIONS_MODE_STRUCT DISPLAY_FUNCTIONS_MODE;
@@ -54,10 +55,10 @@ extern DISPLAY_FUNCTIONS_MODE_STRUCT DISPLAY_FUNCTIONS_MODE;
 struct SGC_COLORS_STRUCT {
 	static const int16_t WHITE 	    = 0xFFFF;
 	static const int16_t BLACK 	    = 0x0000;
-	static const int16_t RED 	      = 0xF800;
-	static const int16_t DRK_RED 	  = 0x5000;
+	static const int16_t RED		= 0xF800;
+	static const int16_t DRK_RED    = 0x5000;
 	static const int16_t GREEN 	    = 0x03E0;
-	static const int16_t DRK_GREEN 	= 0x01E0;
+	static const int16_t DRK_GREEN  = 0x01E0;
 	static const int16_t BLUE 	    = 0x001F;
 	static const int16_t DRK_BLUE   = 0x000A;
 	static const int16_t CYAN       = 0x07FF;
@@ -110,6 +111,7 @@ class GB4DLcdDriver
     uint8_t setPenSize(bool solid);
     uint8_t enableBacklight(bool enable);
     uint8_t enableTouch(bool enable);
+    uint8_t setImageFormat(uint8_t format);
     uint8_t getTouchActivity();
 		
     uint8_t drawString(uint8_t column, uint8_t row, SGC_FONT font, int16_t color, const char *string);

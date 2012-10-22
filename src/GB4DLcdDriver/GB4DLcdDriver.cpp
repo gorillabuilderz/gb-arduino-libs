@@ -220,6 +220,17 @@ uint8_t GB4DLcdDriver::enableTouch(bool enable) {
 	return response;
 }
 
+uint8_t GB4DLcdDriver::setImageFormat(uint8_t format) {
+	_transport->select();
+	_transport->prepareWrite();
+	_transport->write(SGC_COMMANDS.DISPLAY_FUNCTIONS);
+	_transport->write(DISPLAY_FUNCTIONS_MODE.IMAGE_FORMAT);
+	_transport->write(format);
+	_transport->deselect();
+
+	return readReply();
+}
+
 uint8_t GB4DLcdDriver::getTouchActivity() {
 	_transport->select();
 	_transport->prepareWrite();
