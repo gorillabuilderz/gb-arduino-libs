@@ -5,6 +5,7 @@
 #include <Transport.h>
 
 SGC_COMMANDS_STRUCT SGC_COMMANDS;
+SGC_EXT_COMMANDS_STRUCT SGC_EXT_COMMANDS;
 
 // 0 : 5x7 internal font
 // 1 : 8x8 internal font
@@ -19,7 +20,7 @@ const SGC_FONT SGC_FONT_SIZE_STRUCT::LARGEST	= {0x03, 10, 14};
 
 
 GB4DLcdDriver::GB4DLcdDriver(Transport *transport) {
-	_transport = transport;	
+	_transport = transport;
 }
 
 bool GB4DLcdDriver::isAck(uint8_t reply) {
@@ -51,11 +52,11 @@ bool GB4DLcdDriver::initialise() {
 
 void GB4DLcdDriver::reset() {
 	pinMode(SGC_COMMANDS.LCD_PIN, OUTPUT);
-	
+
 	// Reset and initialise the display
   	digitalWrite(SGC_COMMANDS.LCD_PIN, LOW);
   	delay(10);
-  	digitalWrite(SGC_COMMANDS.LCD_PIN, HIGH);  
+  	digitalWrite(SGC_COMMANDS.LCD_PIN, HIGH);
 }
 
 uint8_t GB4DLcdDriver::getLcdResetPin() {
@@ -66,13 +67,13 @@ void GB4DLcdDriver::version(boolean showOnScreen) {
 	_transport->select();
 	_transport->prepareWrite();
 	_transport->write(SGC_COMMANDS.VERSION);
-	_transport->write((byte)showOnScreen);	
+	_transport->write((byte)showOnScreen);
 	_transport->deselect();
-	
+
 	_transport->select();
 	_transport->waitForData();
 	_transport->deselect();
-	
+
 	_transport->select();
 	_transport->prepareRead();
 	_transport->read();	// Device Type
@@ -107,7 +108,7 @@ uint8_t GB4DLcdDriver::clearScreen() {
 	_transport->prepareWrite();
   	_transport->write(SGC_COMMANDS.CLEAR_SCREEN);
   	_transport->deselect();
-  	
+
   	return readReply();
 }
 
@@ -138,10 +139,10 @@ uint8_t GB4DLcdDriver::readReply() {
 	_transport->prepareRead();
     uint8_t readByte = _transport->read();
     _transport->deselect();
-    
+
 //    Serial.print("Read:");
 //    Serial.println(readByte, HEX);
-    
+
     if(isAck(readByte)) {
     	Status.success();
     }
@@ -161,7 +162,7 @@ uint8_t GB4DLcdDriver::setBackgroundColor(int16_t color) {
 	_transport->write(SGC_COMMANDS.SET_BACKGROUND_COLOR);
 	writeInt(color);
 	_transport->deselect();
-	
+
 	return readReply();
 }
 
@@ -264,7 +265,7 @@ uint8_t GB4DLcdDriver::drawString(uint8_t column, uint8_t row, SGC_FONT font, in
   	_transport->write(string);
   	_transport->write(SGC_COMMANDS.STRING_TERMINATOR);
 	_transport->deselect();
-	
+
   	return readReply();
 }
 
@@ -279,7 +280,7 @@ uint8_t GB4DLcdDriver::drawString(uint8_t column, uint8_t row, SGC_FONT font, in
   	_transport->write(character);
   	_transport->write(SGC_COMMANDS.STRING_TERMINATOR);
 	_transport->deselect();
-	
+
   	return readReply();
 }
 
@@ -304,12 +305,12 @@ uint8_t GB4DLcdDriver::drawCircle(int16_t x, int16_t y, int16_t radius, int16_t 
 	_transport->select();
 	_transport->prepareWrite();
   	_transport->write(SGC_COMMANDS.DRAW_CIRCLE);
-  	writeInt(x);  
-  	writeInt(y);  
-	writeInt(radius);  
+  	writeInt(x);
+  	writeInt(y);
+	writeInt(radius);
 	writeInt(color);
 	_transport->deselect();
-	
+
   	return readReply();
 }
 
@@ -317,15 +318,15 @@ uint8_t GB4DLcdDriver::drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t 
 	_transport->select();
 	_transport->prepareWrite();
   	_transport->write(SGC_COMMANDS.DRAW_TRIANGLE);
-  	writeInt(x1);  
-  	writeInt(y1);  
-  	writeInt(x2);  
-  	writeInt(y2);  
-  	writeInt(x3);  
-	writeInt(y3);  
+  	writeInt(x1);
+  	writeInt(y1);
+  	writeInt(x2);
+  	writeInt(y2);
+  	writeInt(x3);
+	writeInt(y3);
 	writeInt(color);
 	_transport->deselect();
-	
+
   	return readReply();
 }
 
@@ -333,11 +334,11 @@ uint8_t GB4DLcdDriver::drawPixel(int16_t x, int16_t y, int16_t color) {
 	_transport->select();
 	_transport->prepareWrite();
   	_transport->write(SGC_COMMANDS.DRAW_PIXEL);
-  	writeInt(x);  
-  	writeInt(y);  
+  	writeInt(x);
+  	writeInt(y);
 	writeInt(color);
 	_transport->deselect();
-	
+
   	return readReply();
 }
 
@@ -357,13 +358,13 @@ uint8_t GB4DLcdDriver::commandFourIntsColor(uint8_t command, int16_t int1, int16
 	_transport->select();
 	_transport->prepareWrite();
   	_transport->write(command);
-  	writeInt(int1);  
-  	writeInt(int2);  
-  	writeInt(int3);  
-	writeInt(int4);  
+  	writeInt(int1);
+  	writeInt(int2);
+  	writeInt(int3);
+	writeInt(int4);
 	writeInt(color);
 	_transport->deselect();
-	
+
   	return readReply();
 }
 
@@ -371,12 +372,26 @@ uint8_t GB4DLcdDriver::screenCopyPaste(int16_t xs, int16_t ys, int16_t xd, int16
 	_transport->select();
 	_transport->prepareWrite();
   	_transport->write(SGC_COMMANDS.COPY_PASTE);
-  	writeInt(xs);  
-  	writeInt(ys);  
-  	writeInt(xd);  
-	writeInt(yd);  
+  	writeInt(xs);
+  	writeInt(ys);
+  	writeInt(xd);
+	writeInt(yd);
 	writeInt(width);
 	writeInt(height);
+	_transport->deselect();
+
+  	return readReply();
+}
+
+uint8_t GB4DLcdDriver::SDDisplayIcon(uint16_t xs, int16_t ys, uint32_t sector) {
+	_transport->select();
+	_transport->prepareWrite();
+  	_transport->write(SGC_EXT_COMMANDS.EXT_COMMAND_ID);
+  	_transport->write(SGC_EXT_COMMANDS.SD_DISPLAY_IMAGE_ICON);
+  	writeInt(xs);
+  	writeInt(ys);
+  	_transport->write((uint8_t)(sector>>16));
+	writeInt((uint16_t)sector);
 	_transport->deselect();
 
   	return readReply();

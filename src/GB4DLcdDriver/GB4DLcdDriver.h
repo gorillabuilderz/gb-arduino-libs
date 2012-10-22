@@ -44,6 +44,23 @@ struct SGC_COMMANDS_STRUCT {
 	static const uint8_t 	DRAW_GRAPHICS_STRING		= 0x53;
 };
 
+struct SGC_EXT_COMMANDS_STRUCT {
+	static const uint8_t	EXT_COMMAND_ID				= 0x40;
+
+	// SD memory card commands
+	static const uint8_t 	SD_INIT						= 0x69;
+	static const uint8_t 	SD_SET_ADDRESS				= 0x41;
+	static const uint8_t 	SD_READ_BYTE				= 0x72;
+	static const uint8_t 	SD_WRITE_BYTE				= 0x77;
+	static const uint8_t 	SD_READ_SECTOR				= 0x52;
+	static const uint8_t 	SD_WRITE_SECTOR				= 0x57;
+	static const uint8_t 	SD_SCREEN_SAVE_TO_CARD		= 0x43;
+	static const uint8_t 	SD_DISPLAY_IMAGE_ICON		= 0x49;
+	static const uint8_t 	SD_DISPLAY_OBJECT			= 0x4F;
+	static const uint8_t 	SD_DISPLAY_ANIMATION		= 0x56;
+	static const uint8_t 	SD_RUN_SCRIPT				= 0x50;
+};
+
 struct DISPLAY_FUNCTIONS_MODE_STRUCT {
 	static const uint8_t BACKLIGHT_CONTROL	= 0x00;
 	static const uint8_t TOUCH_CONTROL		= 0x05;
@@ -78,7 +95,6 @@ struct SGC_FONT_SIZE_STRUCT {
 	static const SGC_FONT LARGE;
 	static const SGC_FONT LARGEST;
 };
-
 
 struct SGC_BAUD_RATE_STRUCT {
 	static const uint8_t B9600		= 0x06;
@@ -126,7 +142,9 @@ class GB4DLcdDriver
     uint8_t drawPixel(int16_t x, int16_t y, int16_t color);
 	//void drawPolygon();
     uint8_t screenCopyPaste(int16_t xs, int16_t ys, int16_t xd, int16_t yd, int16_t width, int16_t height);
-	
+
+	uint8_t SDDisplayIcon(uint16_t xs, int16_t ys, uint32_t sector);
+
 	Transport *getTransport();
 	
   private:
