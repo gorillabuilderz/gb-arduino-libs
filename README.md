@@ -20,7 +20,7 @@ libraries
     |- GBTransport
     |- GBUtils
 ```   
-If you're not too sure where to find your sketchbook folder, you can view or change the location by the Arduino IDE Preferences dialog. Generally this can be one of three places depending on your Opertating System:
+If you're not too sure where to find your sketchbook folder, you can view or change the location by the Arduino IDE Preferences dialog. Generally the [sketchbook][environment] location can be one of three places depending on your Opertating System:
     * Linux: `$HOME/sketchbook`
     * Windows: `My Documents\Arduino`
     * Mac: `$HOME/Documents/Arduino`
