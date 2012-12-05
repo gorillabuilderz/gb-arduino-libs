@@ -39,7 +39,7 @@ Below are a few code snippets to get an idea of general usage.
 
 ### GBIMAC
 
-```c
+```cpp
 #include <SPI.h>
 #include <GBIMAC.h>
 
@@ -90,15 +90,69 @@ if(client.available()) {
   char c = client.read();
   Serial.print(c);
 }
-
 ```
 
 #### Server
 Work in progress
 
-### 4D Graphics (GB4DGraphics)
+### 4D SGC Driver (GB4DLcdDriver)
+```cpp
+// Use SPI switch to upload the sketch and then switch to Serial
+// mode to run the sketch and restart.
+GB4DSerialLcdDriver lcd;
+// To run in SPI mode, switch must be set to SPI
+//GB4DSPILcdDriver lcd;
 
-```arduino
+lcd.initialise();
+lcd.version(true);
+
+// Different ways to set the background color
+delay(1000);
+lcd.setBackgroundColor(SGC_COLORS.WHITE);
+lcd.clearScreen();
+
+delay(1000);
+lcd.replaceBackgroundColor(SGC_COLORS.RED);
+  
+delay(1000);    
+lcd.setBackgroundColor(SGC_COLORS.GREEN);
+lcd.clearScreen();  
+delay(1000);    
+lcd.setBackgroundColor(SGC_COLORS.BLUE);
+lcd.clearScreen();  
+delay(1000);    
+lcd.setBackgroundColor(SGC_COLORS.BLACK);
+lcd.clearScreen();  
+  
+lcd.clearScreen();
+lcd.drawString(0,0, SGC_FONT_SIZE.SMALL, SGC_COLORS.WHITE, "GorillaBuilderz!!!");
+lcd.drawString(0,1, SGC_FONT_SIZE.SMALL, SGC_COLORS.WHITE, "4D LCD Shield 1");  
+
+// Fonts, shapes and colors
+lcd.drawString(1,3, SGC_FONT_SIZE.SMALL, SGC_COLORS.WHITE, "SMALL - WHITE");    
+lcd.drawCircle(100, 100, 20, SGC_COLORS.WHITE);
+lcd.drawPixel(150, 250, SGC_COLORS.WHITE);
+  
+lcd.drawString(2,4, SGC_FONT_SIZE.MEDIUM, SGC_COLORS.RED, "MEDIUM - RED");    
+lcd.drawTriangle(50, 150, 200, 150, 100, 200, SGC_COLORS.RED);  
+lcd.drawRectangle(150, 5, 200, 50, SGC_COLORS.RED);  
+
+lcd.drawString(3,4, SGC_FONT_SIZE.LARGE, SGC_COLORS.GREEN, "LARGE - GREEN");  
+lcd.drawLine(20, 200, 50, 250, SGC_COLORS.GREEN);
+
+lcd.drawString(4,4, SGC_FONT_SIZE.LARGEST, SGC_COLORS.BLUE, "LARGETST - BLUE!");  
+
+lcd.drawElipse(200, 250, 15, 30, SGC_COLORS.BLUE);    
+
+lcd.drawString(0,38, SGC_FONT_SIZE.SMALL, SGC_COLORS.RED, "Bye Bye!");  
+
+lcd.drawGraphicsString(0, 100, SGC_FONT_SIZE.SMALL, SGC_COLORS.RED, "Graphics String!!!");     
+```
+
+### 4D Systems Graphics (GB4DGraphics)
+Built as a layer above GB4DLcdDriver.
+
+```cpp
 // Initialise the SPI driver using the default chip select. 
 // NOTE: Remember to have the UART/SPI switch on SPI when uploading this sketch and running it
 //       using the SPI driver!
