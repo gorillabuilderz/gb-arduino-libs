@@ -44,22 +44,43 @@ struct SGC_COMMANDS_STRUCT {
 	static const uint8_t 	DRAW_GRAPHICS_STRING		= 0x53;
 };
 
+struct SGC_EXT_COMMANDS_STRUCT {
+	static const uint8_t	EXT_COMMAND_ID				= 0x40;
+
+	// SD memory card commands
+	static const uint8_t 	SD_INIT						= 0x69;
+	static const uint8_t 	SD_SET_ADDRESS				= 0x41;
+	static const uint8_t 	SD_READ_BYTE				= 0x72;
+	static const uint8_t 	SD_WRITE_BYTE				= 0x77;
+	static const uint8_t 	SD_READ_SECTOR				= 0x52;
+	static const uint8_t 	SD_WRITE_SECTOR				= 0x57;
+	static const uint8_t 	SD_SCREEN_SAVE_TO_CARD		= 0x43;
+	static const uint8_t 	SD_DISPLAY_IMAGE_ICON		= 0x49;
+	static const uint8_t 	SD_DISPLAY_OBJECT			= 0x4F;
+	static const uint8_t 	SD_DISPLAY_ANIMATION		= 0x56;
+	static const uint8_t 	SD_RUN_SCRIPT				= 0x50;
+};
+
 struct DISPLAY_FUNCTIONS_MODE_STRUCT {
 	static const uint8_t BACKLIGHT_CONTROL	= 0x00;
 	static const uint8_t TOUCH_CONTROL		= 0x05;
+	static const uint8_t IMAGE_FORMAT		= 0x06;
 };
 
 extern DISPLAY_FUNCTIONS_MODE_STRUCT DISPLAY_FUNCTIONS_MODE;
 
 struct SGC_COLORS_STRUCT {
-	static const int16_t WHITE 	= 0xFFFF;
-	static const int16_t BLACK 	= 0x0000;
-	static const int16_t RED 	= 0xF800;
-	static const int16_t BLUE 	= 0x001F;
-	static const int16_t GREEN 	= 0x03E0;
-	static const int16_t CYAN   = 0x07FF;
-	static const int16_t YELLOW = 0xFFE0;
-	static const int16_t MAGENTA = 0xF81F;
+	static const int16_t WHITE 	    = 0xFFFF;
+	static const int16_t BLACK 	    = 0x0000;
+	static const int16_t RED		= 0xF800;
+	static const int16_t DRK_RED    = 0x5000;
+	static const int16_t GREEN 	    = 0x03E0;
+	static const int16_t DRK_GREEN  = 0x01E0;
+	static const int16_t BLUE 	    = 0x001F;
+	static const int16_t DRK_BLUE   = 0x000A;
+	static const int16_t CYAN       = 0x07FF;
+	static const int16_t YELLOW     = 0xFFE0;
+	static const int16_t MAGENTA    = 0xF81F;
 };
 
 struct SGC_FONT {
@@ -74,7 +95,6 @@ struct SGC_FONT_SIZE_STRUCT {
 	static const SGC_FONT LARGE;
 	static const SGC_FONT LARGEST;
 };
-
 
 struct SGC_BAUD_RATE_STRUCT {
 	static const uint8_t B9600		= 0x06;
@@ -107,6 +127,7 @@ class GB4DLcdDriver
     uint8_t setPenSize(bool solid);
     uint8_t enableBacklight(bool enable);
     uint8_t enableTouch(bool enable);
+    uint8_t setImageFormat(uint8_t format);
     uint8_t getTouchActivity();
 		
     uint8_t drawString(uint8_t column, uint8_t row, SGC_FONT font, int16_t color, const char *string);
@@ -121,7 +142,9 @@ class GB4DLcdDriver
     uint8_t drawPixel(int16_t x, int16_t y, int16_t color);
 	//void drawPolygon();
     uint8_t screenCopyPaste(int16_t xs, int16_t ys, int16_t xd, int16_t yd, int16_t width, int16_t height);
-	
+
+	uint8_t SDDisplayIcon(uint16_t xs, int16_t ys, uint32_t sector);
+
 	Transport *getTransport();
 	
   private:
