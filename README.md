@@ -35,11 +35,11 @@ If you're not too sure where to find your sketchbook folder, you can view or cha
 ## Quick Start
 Below are a few code snippets to get an idea of general usage.
 
-**Note:** Code snippets below aren't designed to run.
+**Note:** Code snippets below aren't designed to compile in a sketch, please see examples provided witht the libraries.
 
 ### GBIMAC
 
-```arduino
+```c
 #include <SPI.h>
 #include <GBIMAC.h>
 
@@ -52,7 +52,7 @@ mac.read(macAddress);
 
 #### Client
 
-```arduino
+```cpp
 #include <SPI.h>
 // Need to include GorillaBuilderz WizFi Ethernet libraries
 #include <Transport.h>
