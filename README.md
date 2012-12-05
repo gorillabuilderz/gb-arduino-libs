@@ -33,9 +33,9 @@ If you're not too sure where to find your sketchbook folder, you can view or cha
 2. Follow the Installation Instructions above
 
 ## Quick Start
-Below are a few code snippets to get an idea of general usage.
+Below are a few code snippets to get an idea of general library usage.
 
-**Note:** Code snippets below aren't designed to compile in a sketch, please see examples provided witht the libraries.
+**Note:** Code snippets below are for sample purposes only, please see examples provided with the libraries for working sketches.
 
 ### GBIMAC
 
