@@ -36,7 +36,7 @@ bool GB4DLcdDriver::isNack(uint8_t reply) {
  */
 void GB4DLcdDriver::transportDeselect() {
 	_transport->deselect();
-	delay(5);
+	delay(10);
 }
 
 bool GB4DLcdDriver::initialise() {
