@@ -46,7 +46,6 @@ void SC16SpiTransport::select() {
 
 void SC16SpiTransport::deselect() {
 	digitalWrite(_chipSelect, HIGH);
-	delay(10);
 }
 
 void SC16SpiTransport::selectAndWriteRegister(uint8_t address, uint8_t data) {

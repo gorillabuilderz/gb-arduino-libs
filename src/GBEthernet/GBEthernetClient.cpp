@@ -28,7 +28,15 @@ int EthernetClient::connect(const char* host, uint16_t port) {
 
 int EthernetClient::connect(IPAddress ip, uint16_t port) {
 	WizFi210::getInstance()->setAutoTcpConnect(Ethernet.getRawAddress(ip), port);
-	return WizFi210::getInstance()->autoConnectExistingAssociation();
+
+	if(!Ethernet.associated() && !Ethernet.associate()) {
+		return false;
+	}
+
+	int result = WizFi210::getInstance()->autoConnectExistingAssociation();
+	// Give the modem a bit to connect
+	delay(500);
+	return result;
 }
 
 size_t EthernetClient::write(uint8_t b) {
@@ -72,7 +80,7 @@ void EthernetClient::stop() {
 	// TODO Don't close all connections, only the one this is associated to
     WizFi210::getInstance()->escapeDataMode();
     WizFi210::getInstance()->closeAllConnections();
-    WizFi210::getInstance()->disassociate();
+    flush();
 }
 
 uint8_t EthernetClient::connected() {

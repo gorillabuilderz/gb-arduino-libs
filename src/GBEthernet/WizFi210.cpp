@@ -63,7 +63,7 @@ bool WizFi210::initialise() {
   	// Enalbe hardware flow control
   	sendCommand("AT&R1", COMMAND_TERMINATOR);
   	// Return response result
-  	return isOk(receiveResponse());
+  	return receiveResponse()->isOk();
 }
 
 void WizFi210::sendCommand(const char *command, ...) {
@@ -129,16 +129,17 @@ int WizFi210::read() {
 	return read;      
 }
 
-bool WizFi210::isOk(char response) {
-	return response == MODEM_RESPONSE_CODES::OK;
+ResponseCodeHandler *WizFi210::receiveResponse() {
+	return receiveResponse(&_numericResponseHandler);
 }
 
-char WizFi210::receiveResponse(char expectedResponse) {
+ResponseCodeHandler *WizFi210::receiveResponse(ResponseCodeHandler *responseHandler) {
 	unsigned long currentTimeout = millis() + _timeout;
   
   	char response = -1;
   	int available;
-  	_responseHandler.reset();
+
+  	responseHandler->reset();
 
   	while(currentTimeout > millis()) {
   		_transport.select();
@@ -156,7 +157,7 @@ char WizFi210::receiveResponse(char expectedResponse) {
 
         		// NOTE: We are clearing out the buffer before checking for valid response. This is generally ok as the modem
         		//		 always ends with a response. This will become an issue if there is a scenario that meet this requirement
-        		_responseHandler.putByte(response);
+        		responseHandler->putByte(response);
         		if(DEBUG) {
         			Serial.print(response);
 //        			Serial.print(response, HEX);
@@ -164,35 +165,13 @@ char WizFi210::receiveResponse(char expectedResponse) {
         		}
       		}      
 
-      		// Dodgy logic to cater for when the modem does not send through a \n0 on connect. Instead terminates
-      		// command response with a 0 appended. Makes it hard to decipher if the 0 is part of the IP or the OK code
-      		// Possibly need to conver this to process a [OK/ERROR] instead
-
-      		// If expected response is set
-      		if(expectedResponse != -1) {
-				_transport.deselect();
-				_transport.select();
-				// If there's more items available, this response is not what we're looking for, we want the
-				// last byte transmitted
-				if(_transport.available() > 0) {
-					response = -1;
-				}
-      		}
       		// Deselect preparing for the next available or method exit
     		_transport.deselect();
 
-    		if(expectedResponse == -1) {
-				// If the response is as expected
-				if(_responseHandler.isResponseReady()) {
-					response = _responseHandler.getResponseCode();
-					break;
-				}
-    		}
-    		else if(expectedResponse != -1) {
-    			if(response == expectedResponse) {
-    				break;
-    			}
-    		}
+			// If the response is as expected
+			if(responseHandler->isResponseReady()) {
+				break;
+			}
 		}
     	else {
     		_transport.deselect();
@@ -210,15 +189,18 @@ char WizFi210::receiveResponse(char expectedResponse) {
 			Serial.println(response);
 		}
 		else {
-			if(response >= 0) {
+			if(responseHandler->isResponseReady()) {
 				Serial.println();
 
-				if(isOk(response)) {
+				if(responseHandler->isOk()) {
 					Serial.println("-- OK Received");
 				}
+				else if(responseHandler->isError()) {
+					Serial.println("-- ERROR Received");
+				}
 				else {
-					Serial.print("Other response received: ");
-					Serial.println(response);
+					Serial.print("-- Other response received: ");
+					Serial.println(responseHandler->getResponse());
 				}
 			}
 		}
@@ -227,12 +209,12 @@ char WizFi210::receiveResponse(char expectedResponse) {
 	// Reset to the default timeout
   	_timeout = TIMEOUT;
 
-  	return response;
+  	return responseHandler;
 }
 
 bool WizFi210::wirelessScan() {
 	  sendCommand("AT+WS", COMMAND_TERMINATOR);
-	  return isOk(receiveResponse());
+	  return receiveResponse()->isOk();
 }
 
 void WizFi210::setMac(uint8_t *mac) {
@@ -246,7 +228,7 @@ bool WizFi210::setWPAPSK(const char* SSID, const char* passphrase) {
 	sendCommand("AT+WPAPSK=", SSID, COMMAND_SEPERATOR, passphrase, COMMAND_TERMINATOR);
 	// A bit longer than standard timeout
 	_timeout = 10000;
-  	return isOk(receiveResponse());
+  	return receiveResponse()->isOk();
 }
 
 void WizFi210::disassociate() {
@@ -255,20 +237,30 @@ void WizFi210::disassociate() {
 }
 
 bool WizFi210::associate(const char* SSID) {
+	// Enable text response because this command doesn't return a valid numerical response
+	sendCommand("ATV1", COMMAND_TERMINATOR);
+	receiveResponse(&_textResponseHandler);
+
   	sendCommand("AT+WA=", SSID, COMMAND_TERMINATOR);
   	// This command can take a bit
   	_timeout = 15000;
-  	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
+  	bool associated = receiveResponse(&_textResponseHandler)->isOk();
+
+  	// Disable text response
+	sendCommand("ATV0", COMMAND_TERMINATOR);
+	receiveResponse();
+
+  	return associated;
 }
 
 bool WizFi210::setAutoAssociate(const char* SSID) {
   	sendCommand("AT+WAUTO=0,", SSID, COMMAND_TERMINATOR);
-	return isOk(receiveResponse());
+	return receiveResponse()->isOk();
 }
 
 bool WizFi210::enableDHCP(bool enable) {
 	sendCommand("AT+NDHCP=", enable ? "1" : "0", COMMAND_TERMINATOR);
-	return isOk(receiveResponse());
+	return receiveResponse()->isOk();
 }
 
 bool WizFi210::setNetworkParameters(uint8_t *address, uint8_t *netMask, uint8_t *gateway) {
@@ -280,31 +272,29 @@ bool WizFi210::setNetworkParameters(uint8_t *address, uint8_t *netMask, uint8_t 
 	writeIP(gateway);
 	sendCommand(COMMAND_TERMINATOR, COMMAND_SECTION_TERMINATOR);
 
-	return isOk(receiveResponse());
+	return receiveResponse()->isOk();
 }
 
 void WizFi210::enterDataMode() {
 	if(DEBUG) Serial.print("Entering data mode");
 	sendCommand("ATO", COMMAND_TERMINATOR);
-	isOk(receiveResponse());
+	receiveResponse()->isOk();
+}
+
+void WizFi210::flush() {
+  while (available()) read();
 }
 
 void WizFi210::escapeDataMode() {
 	if(DEBUG) Serial.println("Escaping data mode");
-	write("+++");
+	write("+++\n");
 	// No new line, so put new line for logging purposes
 	if(DEBUG) Serial.println();
 	// Delay of one second to exit data mode
 	delay(2000);
-	read();
-	write(COMMAND_TERMINATOR);
-	read();
-	write(COMMAND_TERMINATOR);
-	read();
-	write(COMMAND_TERMINATOR);
-	read();
+	flush();
 
-	sendCommand("ATV0", COMMAND_TERMINATOR);
+	sendCommand("AT", COMMAND_TERMINATOR);
 	receiveResponse();
 }
 
@@ -328,17 +318,18 @@ bool WizFi210::autoAssociateAndConnect() {
 	sendCommand("ATA", COMMAND_TERMINATOR);
 	// A little bit longer on the timeout for this command
 	_timeout = 15000;
-	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
+	return receiveResponse()->isOk();
 }
 
 bool WizFi210::autoConnectExistingAssociation() {
 	sendCommand("ATA2", COMMAND_TERMINATOR);
-	return isOk(receiveResponse(MODEM_RESPONSE_CODES::OK));
+	_timeout = 15000;
+	return receiveResponse()->isOk();
 }
 
 void WizFi210::closeAllConnections() {
 	sendCommand("AT+NCLOSEALL", COMMAND_TERMINATOR);
-	isOk(receiveResponse());
+	receiveResponse()->isOk();
 }
 
 bool WizFi210::connected() {
@@ -388,5 +379,5 @@ bool WizFi210::tcpConnect(uint8_t *address, int port) {
   	sendCommand(COMMAND_SEPERATOR, COMMAND_SECTION_TERMINATOR);
   	print(port, DEC);
   	sendCommand(COMMAND_TERMINATOR);
-	return isOk(receiveResponse());
+	return receiveResponse()->isOk();
 }
