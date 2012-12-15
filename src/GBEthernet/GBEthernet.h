@@ -38,6 +38,8 @@ public:
   // GB Wifi Functions
   void passphrase(char *passphrase);
   void ssid(char *ssid);
+  bool associated();
+  bool associate();
 
   // Created because it appears IPAddress is friending Client, not EthernetClient
   uint8_t* getRawAddress(IPAddress ipAddress);

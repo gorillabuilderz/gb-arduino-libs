@@ -43,7 +43,7 @@ int EthernetClass::begin(uint8_t *mac_address)
 	_wizFi->enableDHCP(true);
 
 	// Associate to the network here...
-	return _wizFi->associate(_ssid);
+	return associate();
 }
 
 void EthernetClass::begin(uint8_t *mac_address, IPAddress local_ip)
@@ -128,6 +128,14 @@ void EthernetClass::passphrase(char *passphrase) {
 
 void EthernetClass::ssid(char *ssid) {
 	_ssid = ssid;
+}
+
+bool EthernetClass::associated() {
+	return _wizFi->associated();
+}
+
+bool EthernetClass::associate() {
+	return _wizFi->associate(_ssid);
 }
 
 uint8_t* EthernetClass::getRawAddress(IPAddress ipAddress) {
