@@ -31,6 +31,14 @@ bool GB4DLcdDriver::isNack(uint8_t reply) {
 	return reply == SGC_COMMANDS.DISPLAY_NACK;
 }
 
+/**
+ * Seems like the LCD needs a bit of a delay after the CS deslect
+ */
+void GB4DLcdDriver::transportDeselect() {
+	_transport->deselect();
+	delay(5);
+}
+
 bool GB4DLcdDriver::initialise() {
 	if(!_transport->initialise()) {
 		return false;
@@ -45,7 +53,7 @@ bool GB4DLcdDriver::initialise() {
   	_transport->select();
   	_transport->prepareWrite();
   	_transport->write(SGC_COMMANDS.AUTOBAUD);
-  	_transport->deselect();
+  	transportDeselect();
 
   	return isAck(readReply());
 }
@@ -68,11 +76,11 @@ void GB4DLcdDriver::version(boolean showOnScreen) {
 	_transport->prepareWrite();
 	_transport->write(SGC_COMMANDS.VERSION);
 	_transport->write((byte)showOnScreen);
-	_transport->deselect();
+	transportDeselect();
 
 	_transport->select();
 	_transport->waitForData();
-	_transport->deselect();
+	transportDeselect();
 
 	_transport->select();
 	_transport->prepareRead();
@@ -81,7 +89,7 @@ void GB4DLcdDriver::version(boolean showOnScreen) {
 	_transport->read();	// firmware rev
 	_horizontalResolution = translateByteToHorizontalResolution(_transport->read());	// hor res
 	_verticalResolution = translateByteToVerticalResolution(_transport->read());	// vert res
-	_transport->deselect();
+	transportDeselect();
 }
 
 bool GB4DLcdDriver::setBaudRate(uint8_t baudRate) {
@@ -98,7 +106,7 @@ bool GB4DLcdDriver::setBaudRate(uint8_t baudRate) {
 			break;
 	}
 
-	_transport->deselect();
+	transportDeselect();
 
 	return true;
 }
@@ -107,7 +115,7 @@ uint8_t GB4DLcdDriver::clearScreen() {
 	_transport->select();
 	_transport->prepareWrite();
   	_transport->write(SGC_COMMANDS.CLEAR_SCREEN);
-  	_transport->deselect();
+  	transportDeselect();
 
   	return readReply();
 }
@@ -116,12 +124,12 @@ uint8_t GB4DLcdDriver::readByte() {
 	_transport->select();
 	// Wait for a response
 	_transport->waitForData();
-	_transport->deselect();
+	transportDeselect();
 
 	_transport->select();
 	_transport->prepareRead();
     uint8_t readByte = _transport->read();
-    _transport->deselect();
+    transportDeselect();
 
 //    Serial.print("Read:");
 //    Serial.println(readByte, HEX);
@@ -133,12 +141,12 @@ uint8_t GB4DLcdDriver::readReply() {
 	_transport->select();
 	// Wait for a response
 	_transport->waitForData();
-	_transport->deselect();
+	transportDeselect();
 
 	_transport->select();
 	_transport->prepareRead();
     uint8_t readByte = _transport->read();
-    _transport->deselect();
+    transportDeselect();
 
 //    Serial.print("Read:");
 //    Serial.println(readByte, HEX);
@@ -161,7 +169,7 @@ uint8_t GB4DLcdDriver::setBackgroundColor(int16_t color) {
 	_transport->prepareWrite();
 	_transport->write(SGC_COMMANDS.SET_BACKGROUND_COLOR);
 	writeInt(color);
-	_transport->deselect();
+	transportDeselect();
 
 	return readReply();
 }
@@ -171,7 +179,7 @@ uint8_t GB4DLcdDriver::replaceBackgroundColor(int16_t color) {
 	_transport->prepareWrite();
 	_transport->write(SGC_COMMANDS.REPLACE_BACKGROUND_COLOR);
 	writeInt(color);
-	_transport->deselect();
+	transportDeselect();
 
 	return readReply();
 }
@@ -181,7 +189,7 @@ uint8_t GB4DLcdDriver::setPenSize(bool solid) {
 	_transport->prepareWrite();
 	_transport->write(SGC_COMMANDS.SET_PEN_SIZE);
 	_transport->write(!solid);
-	_transport->deselect();
+	transportDeselect();
 
 	return readReply();
 }
@@ -192,7 +200,7 @@ uint8_t GB4DLcdDriver::enableBacklight(bool enable) {
 	_transport->write(SGC_COMMANDS.DISPLAY_FUNCTIONS);
 	_transport->write(DISPLAY_FUNCTIONS_MODE.BACKLIGHT_CONTROL);
 	_transport->write(enable);
-	_transport->deselect();
+	transportDeselect();
 
 	return readReply();
 }
@@ -203,7 +211,7 @@ uint8_t GB4DLcdDriver::enableTouch(bool enable) {
 	_transport->write(SGC_COMMANDS.DISPLAY_FUNCTIONS);
 	_transport->write(DISPLAY_FUNCTIONS_MODE.TOUCH_CONTROL);
 	_transport->write(!enable);
-	_transport->deselect();
+	transportDeselect();
 
 	uint8_t response = readReply();
 
@@ -213,7 +221,7 @@ uint8_t GB4DLcdDriver::enableTouch(bool enable) {
 		_transport->write(SGC_COMMANDS.DISPLAY_FUNCTIONS);
 		_transport->write(DISPLAY_FUNCTIONS_MODE.TOUCH_CONTROL);
 		_transport->write(0x02);
-		_transport->deselect();
+		transportDeselect();
 
 		return readReply();
 	}
@@ -227,7 +235,7 @@ uint8_t GB4DLcdDriver::setImageFormat(uint8_t format) {
 	_transport->write(SGC_COMMANDS.DISPLAY_FUNCTIONS);
 	_transport->write(DISPLAY_FUNCTIONS_MODE.IMAGE_FORMAT);
 	_transport->write(format);
-	_transport->deselect();
+	transportDeselect();
 
 	return readReply();
 }
@@ -237,18 +245,18 @@ uint8_t GB4DLcdDriver::getTouchActivity() {
 	_transport->prepareWrite();
 	_transport->write(0x6f);
 	_transport->write((uint8_t)0x04);
-	_transport->deselect();
+	transportDeselect();
 
 //	_transport->select();
 //	// Wait for a response
 //	_transport->waitForData();
-//	_transport->deselect();
+//	transportDeselect();
 //
 //	_transport->select();
 //	_transport->prepareRead();
 //	//_transport->read();
 //	uint8_t readByte = _transport->read();
-//	_transport->deselect();
+//	transportDeselect();
 //
 //	return readByte;
 	return readByte();
@@ -264,7 +272,7 @@ uint8_t GB4DLcdDriver::drawString(uint8_t column, uint8_t row, SGC_FONT font, in
   	writeInt(color);
   	_transport->write(string);
   	_transport->write(SGC_COMMANDS.STRING_TERMINATOR);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -279,7 +287,7 @@ uint8_t GB4DLcdDriver::drawString(uint8_t column, uint8_t row, SGC_FONT font, in
   	writeInt(color);
   	_transport->write(character);
   	_transport->write(SGC_COMMANDS.STRING_TERMINATOR);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -296,7 +304,7 @@ uint8_t GB4DLcdDriver::drawGraphicsString(int16_t x, int16_t y, SGC_FONT font, i
   	_transport->write(1);
   	_transport->write(string);
   	_transport->write(SGC_COMMANDS.STRING_TERMINATOR);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -309,7 +317,7 @@ uint8_t GB4DLcdDriver::drawCircle(int16_t x, int16_t y, int16_t radius, int16_t 
   	writeInt(y);
 	writeInt(radius);
 	writeInt(color);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -325,7 +333,7 @@ uint8_t GB4DLcdDriver::drawTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t 
   	writeInt(x3);
 	writeInt(y3);
 	writeInt(color);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -337,7 +345,7 @@ uint8_t GB4DLcdDriver::drawPixel(int16_t x, int16_t y, int16_t color) {
   	writeInt(x);
   	writeInt(y);
 	writeInt(color);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -363,7 +371,7 @@ uint8_t GB4DLcdDriver::commandFourIntsColor(uint8_t command, int16_t int1, int16
   	writeInt(int3);
 	writeInt(int4);
 	writeInt(color);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -378,7 +386,7 @@ uint8_t GB4DLcdDriver::screenCopyPaste(int16_t xs, int16_t ys, int16_t xd, int16
 	writeInt(yd);
 	writeInt(width);
 	writeInt(height);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }
@@ -392,7 +400,7 @@ uint8_t GB4DLcdDriver::SDDisplayIcon(uint16_t xs, int16_t ys, uint32_t sector) {
   	writeInt(ys);
   	_transport->write((uint8_t)(sector>>16));
 	writeInt((uint16_t)sector);
-	_transport->deselect();
+	transportDeselect();
 
   	return readReply();
 }

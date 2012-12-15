@@ -116,6 +116,7 @@ class GB4DLcdDriver
     void version(boolean showOnScreen);
     bool isAck(uint8_t reply);
     bool isNack(uint8_t reply);
+    void transportDeselect();
     uint8_t getLcdResetPin();
     int16_t getHorizontalResolution();
     int16_t getVerticalResolution();
