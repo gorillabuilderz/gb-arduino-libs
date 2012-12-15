@@ -22,7 +22,7 @@
 #include <GBIMAC.h>
 
 // NOTE: With GorillaBuilderz shield we have a a GBIMAC identifier you can use!
-GBIMAC macReader(3);
+GBIMAC macReader(A1);
 byte mac[MAC_LENGTH];
 
 IPAddress server(74,125,237,114); // Google
