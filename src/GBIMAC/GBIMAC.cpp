@@ -23,7 +23,11 @@ void GBIMAC::initSPI()
 	digitalWrite (_chipSelect, HIGH); 
   
 	SPI.begin(); 
-	SPI.setClockDivider(SPI_CLOCK_DIV32);  
+	#if defined(__AVR__)
+	 SPI.setClockDivider(SPI_CLOCK_DIV32);  
+	#else
+	 SPI.setClockDivider(168);  
+	#endif
 }
 
 void GBIMAC::read(byte macAddressArray[]) 

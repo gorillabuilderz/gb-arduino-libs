@@ -40,7 +40,7 @@ class SC16SpiTransport : public Transport
     void setChipSelect(int chipSelect);
     int getChipSelect();
     int16_t getBaudRate();
-    void setBaudRate(int baudRate);
+    void setBaudRate(int16_t baudRate);
     bool initialise();
     using Print::write;
     size_t write(uint8_t command);

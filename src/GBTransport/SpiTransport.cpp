@@ -12,7 +12,11 @@ bool SpiTransport::initialise() {
 	deselect();
 	
 	SPI.begin();
-  	SPI.setClockDivider(SPI_CLOCK_DIV32);//slow SPI bus speed
+	#if defined(__AVR__)
+  	 SPI.setClockDivider(SPI_CLOCK_DIV32);//slow SPI bus speed
+	#else
+  	 SPI.setClockDivider(168);//slow SPI bus speed
+	#endif
 	return true;
 }
 

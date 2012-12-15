@@ -23,6 +23,6 @@ unsigned long Transport::getTimeout() {
     return _timeout;
 }
 
-int16_t Transport::available() {
+int Transport::available() {
 	return 1;
 }
