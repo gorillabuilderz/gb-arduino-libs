@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <SC16SpiTransport.h>
-#include <GString.h>
+#include "../GBUtils/GString.h"
 
 class MODEM_RESPONSE_CODES {
 	public:
