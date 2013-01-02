@@ -176,6 +176,8 @@ ResponseCodeHandler *WizFi210::receiveResponse(ResponseCodeHandler *responseHand
     	else {
     		_transport.deselect();
     	}
+    	// Delay between chip selects appears to make this more stable
+    	delayMicroseconds(15);
 	}
 
   	// Lets print the outcome if required
