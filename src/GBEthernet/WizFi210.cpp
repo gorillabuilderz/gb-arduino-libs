@@ -114,7 +114,9 @@ size_t WizFi210::write(const uint8_t *buffer, size_t size) {
 }
 
 int WizFi210::available() {
-	return _transport.available();
+	bool available = _transport.available();
+	delayMicroseconds(15);
+	return available;
 }
 
 int WizFi210::read() {
@@ -277,7 +279,9 @@ void WizFi210::enterDataMode() {
 
 void WizFi210::flush() {
 //  while (available()) read();
-	receiveResponse();
+	// Ensure the timeout is going to be > 2 seconds
+	_timeout = 3000;
+	receiveResponse(&_flushResponseHandler);
 }
 
 void WizFi210::escapeDataMode() {
@@ -286,7 +290,6 @@ void WizFi210::escapeDataMode() {
 	// No new line, so put new line for logging purposes
 	if(DEBUG) Serial.println();
 	// Delay of one second to exit data mode
-	delay(2000);
 	flush();
 
 	sendCommand("AT", COMMAND_TERMINATOR);

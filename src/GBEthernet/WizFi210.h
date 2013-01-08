@@ -62,7 +62,7 @@ protected:
 
 class NumericResponseCodeHandler : public ResponseCodeHandler {
 public:
-	bool isResponseReady() { return _byteCount == 2;	}
+	virtual bool isResponseReady() { return _byteCount == 2;	}
 	bool isOk() { return isResponseReady() && _responseBuffer[1] == '0'; }
 	bool isError() { return isResponseReady() && (_responseBuffer[1] > 0x30 && _responseBuffer[1] < 0x37); }
 	char getResponse() { return _responseBuffer[1];	}
@@ -75,6 +75,15 @@ protected:
 
 		return true;
 	}
+};
+
+/**
+ * This handler forces a timeout
+ */
+class FlushResponseCodeHandler : public NumericResponseCodeHandler {
+public:
+	// Response is never ready, we want to timeout
+	bool isResponseReady() { return false;	}
 };
 
 class TextResponseCodeHandler : public ResponseCodeHandler {
@@ -174,6 +183,7 @@ class WizFi210 : public Stream
 
   	NumericResponseCodeHandler _numericResponseHandler;
   	TextResponseCodeHandler _textResponseHandler;
+  	FlushResponseCodeHandler _flushResponseHandler;
   	SC16SpiTransport _transport;
   	
   	void writeIP(uint8_t *ip);
