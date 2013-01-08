@@ -5,6 +5,10 @@
 #include <SC16SpiTransport.h>
 #include <GString.h>
 
+#ifndef GB_DEBUG
+#define GB_DEBUG 	false
+#endif
+
 /**
  * Class deals with modem responses. It builds up received bytes and looks for specific response arrays.
  *
@@ -33,7 +37,7 @@ public:
 		// Check the buffer state, if it's no good, reset it
 		if(isBufferValid()) {
 			// If the reponse is ready, don't increment
-			if(!isResponseReady()) {
+			if(!isResponseReady() && _byteCount != BUFFER_LENGTH) { // Guard against buffer overflow. Don't care about extra bytes for now
 				// Increment the counter
 				_byteCount++;
 			}
@@ -50,7 +54,8 @@ public:
 	virtual char getResponse() = 0;
 
 protected:
-	char _responseBuffer[100];
+	static const int BUFFER_LENGTH = 35;
+	static char _responseBuffer[BUFFER_LENGTH];
 	uint8_t _byteCount;
 	virtual bool isBufferValid() = 0;
 };
@@ -152,7 +157,7 @@ class WizFi210 : public Stream
     uint8_t getResetPin();
 	
   private:
-  	static const bool DEBUG 					= true;
+  	static const bool DEBUG 					= GB_DEBUG;
   	static const uint8_t RESET_PIN 				= A1;
   	static const uint8_t DEFAULT_CHIP_SELECT 	= 2;
   	static const uint8_t N_ASSOCIATE   			= 5;

@@ -27,6 +27,11 @@ int EthernetClient::connect(const char* host, uint16_t port) {
 }
 
 int EthernetClient::connect(IPAddress ip, uint16_t port) {
+	// If we're connected, disconnect first
+	if(connected()) {
+		stop();
+	}
+
 	WizFi210::getInstance()->setAutoTcpConnect(Ethernet.getRawAddress(ip), port);
 
 	if(!Ethernet.associated() && !Ethernet.associate()) {
@@ -80,7 +85,6 @@ void EthernetClient::stop() {
 	// TODO Don't close all connections, only the one this is associated to
     WizFi210::getInstance()->escapeDataMode();
     WizFi210::getInstance()->closeAllConnections();
-    flush();
 }
 
 uint8_t EthernetClient::connected() {

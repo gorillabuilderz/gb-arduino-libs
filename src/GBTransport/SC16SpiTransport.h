@@ -50,6 +50,8 @@ class SC16SpiTransport : public Transport
 	void select();    
     void deselect();
   	int available();
+  	// Number of bytes in the tx fifo
+  	int txAvailable();
   	void enableHardwareFlowControl(bool enable);
 	
   private:

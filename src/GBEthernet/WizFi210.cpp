@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include "WizFi210.h"
 
+char ResponseCodeHandler::_responseBuffer[ResponseCodeHandler::BUFFER_LENGTH] = {0};
 const char *WizFi210::COMMAND_TERMINATOR			= "\n";
 const char *WizFi210::COMMAND_SECTION_TERMINATOR	= "";
 const char *WizFi210::COMMAND_SEPERATOR			= ",";
@@ -25,8 +26,8 @@ WizFi210 *WizFi210::getInstance() {
 }
 
 void WizFi210::reset() {
-	if(DEBUG) Serial.println("Modem reset");
-		  
+	if(DEBUG) Serial.println("WF:rst");
+
   	pinMode(_resetPin, OUTPUT);
   	digitalWrite(_resetPin, HIGH);
   	digitalWrite(_resetPin, LOW);
@@ -39,24 +40,24 @@ bool WizFi210::initialise() {
 	reset();
 	
 	if(!_transport.initialise()) {
-		if(DEBUG) Serial.println("Transport init failed");
+		if(DEBUG) Serial.println("WF:tpt:0");
 		return false;
   	}
   	else {
-	    if(DEBUG) Serial.println("Transport init success");    
+	    if(DEBUG) Serial.println("WF:tpt:1");
   	}
   	
-  	if(DEBUG) Serial.println("Initialising modem");
+  	if(DEBUG) Serial.println("WF:init");
   
 	// Enable numerical responses
 	sendCommand("ATV0", COMMAND_TERMINATOR);
 	receiveResponse();
 
-	if(!DEBUG) {
+//	if(!DEBUG) {
 		// Disable echo
-		sendCommand("ATE0", COMMAND_TERMINATOR);
-		receiveResponse();
-	}
+//		sendCommand("ATE0", COMMAND_TERMINATOR);
+//		receiveResponse();
+//	}
 	
   	_transport.enableHardwareFlowControl(true);
 
@@ -113,11 +114,7 @@ size_t WizFi210::write(const uint8_t *buffer, size_t size) {
 }
 
 int WizFi210::available() {
-	int available;
-	_transport.select();
-	available = _transport.available();
-	_transport.deselect();
-	return available;
+	return _transport.available();
 }
 
 int WizFi210::read() {
@@ -142,13 +139,10 @@ ResponseCodeHandler *WizFi210::receiveResponse(ResponseCodeHandler *responseHand
   	responseHandler->reset();
 
   	while(currentTimeout > millis()) {
-  		_transport.select();
-
     	if((available = _transport.available())) {
     		// Extend the timeout, modem is responding
     		currentTimeout = millis() + _timeout;
     		
-    		_transport.deselect();
       		_transport.select();
       
       		_transport.prepareRead();
@@ -173,9 +167,7 @@ ResponseCodeHandler *WizFi210::receiveResponse(ResponseCodeHandler *responseHand
 				break;
 			}
 		}
-    	else {
-    		_transport.deselect();
-    	}
+
     	// Delay between chip selects appears to make this more stable
     	delayMicroseconds(15);
 	}
@@ -186,8 +178,8 @@ ResponseCodeHandler *WizFi210::receiveResponse(ResponseCodeHandler *responseHand
 
 		if(currentTimeout <= millis()) {
 			Serial.println();
-			Serial.println("-- Timed Out");
-			Serial.print("Response was:");
+			Serial.println("WF:tout");
+			Serial.print("WF:rsp:");
 			Serial.println(response);
 		}
 		else {
@@ -195,13 +187,13 @@ ResponseCodeHandler *WizFi210::receiveResponse(ResponseCodeHandler *responseHand
 				Serial.println();
 
 				if(responseHandler->isOk()) {
-					Serial.println("-- OK Received");
+					Serial.println("WF:OK");
 				}
 				else if(responseHandler->isError()) {
-					Serial.println("-- ERROR Received");
+					Serial.println("WF:ERROR");
 				}
 				else {
-					Serial.print("-- Other response received: ");
+					Serial.print("WF:OTHER:");
 					Serial.println(responseHandler->getResponse());
 				}
 			}
@@ -284,11 +276,12 @@ void WizFi210::enterDataMode() {
 }
 
 void WizFi210::flush() {
-  while (available()) read();
+//  while (available()) read();
+	receiveResponse();
 }
 
 void WizFi210::escapeDataMode() {
-	if(DEBUG) Serial.println("Escaping data mode");
+	if(DEBUG) Serial.println("WF:escdata");
 	write("+++\n");
 	// No new line, so put new line for logging purposes
 	if(DEBUG) Serial.println();

@@ -46,6 +46,7 @@ void SC16SpiTransport::select() {
 
 void SC16SpiTransport::deselect() {
 	digitalWrite(_chipSelect, HIGH);
+//	delayMicroseconds(15);
 }
 
 void SC16SpiTransport::selectAndWriteRegister(uint8_t address, uint8_t data) {
@@ -64,9 +65,11 @@ int SC16SpiTransport::read() {
 }
 
 int SC16SpiTransport::available() {
-	// Read the LSR and return the first bit result
-	//return readRegister(REGISTERS.LSR) & 0x01;
-	return readRegister(REGISTERS.RXLVL);
+	return selectAndReadRegister(REGISTERS.RXLVL);
+}
+
+int SC16SpiTransport::txAvailable() {
+	return selectAndReadRegister(REGISTERS.TXLVL);
 }
 
 uint8_t SC16SpiTransport::selectAndReadRegister(uint8_t spiRegister) {
