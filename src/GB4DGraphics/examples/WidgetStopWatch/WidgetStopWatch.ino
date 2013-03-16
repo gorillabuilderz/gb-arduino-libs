@@ -10,7 +10,7 @@
 // Initialise the SPI driver using the default chip select. 
 // NOTE: Remember to have the UART/SPI switch on SPI when uploading this sketch and running it
 //       using the SPI driver!
-GB4DSPILcdDriver lcd;
+GB4DSPILcdDriver lcd(A3);
 
 // Uncomment the following line and comment above to use the serial driver
 // NOTE: If using serial driver, remember to have the UART/SPI switch on SPI when uploading 
@@ -33,10 +33,14 @@ static const long SECOND =  1000; // 1000 milliseconds in a second
 
 Label touchLabel(lcd, 0, 200, "No Touch");
 
+uint16_t x,y;
+
 void setup() {
   delay(3000);
   lcd.initialise();
-
+  Serial.begin(115200);
+  Serial.println("WidgetStopWatch Demo\n\r");
+  
   border.draw();
   timeLabel.draw();
   start.draw();
@@ -56,7 +60,7 @@ void loop() {
   Status.idle();
   
   unsigned long milliSeconds = millis() - startTime;
-  
+  int response;
   int seconds = (((milliSeconds % DAY) % HOUR) % MINUTE)/SECOND;
   
   if(seconds != previousSeconds) {  
@@ -72,20 +76,34 @@ void loop() {
   		hours,
   		minutes,
   		seconds);
-    //timeLabel.setText(string);
+    timeLabel.setText(string);
   }
 
-  delay(500);
-  uint8_t response = lcd.getTouchActivity();
-  if(response) {
-    String responseString = "I've been touched:";
+lcd.detectTouchRegion(8, 68, 92, 105);
+response = lcd.getTouchActivity();
+  if((response == 1)||(response == 3)){
+    String responseString = "Start touched:";
     responseString += response;
     touchLabel.setText(responseString);
-  }
-  else {
-    String responseString = "No touch:";
+    lcd.getTouchXYCoord(x,y);
+    Serial.println(x, DEC);
+    Serial.println(y, DEC);
+
+    response = 0;
+  }else{  
+  
+lcd.detectTouchRegion(98, 68, 182, 105);
+response = lcd.getTouchActivity();
+  if((response == 1)||(response == 3)){
+    String responseString = "Stop touched:";
     responseString += response;
     touchLabel.setText(responseString);
+    lcd.getTouchXYCoord(x,y);
+    Serial.println(x, DEC);
+    Serial.println(y, DEC);
+    response = 0;
+  }  
   }
+    response = 0;
 }
 
