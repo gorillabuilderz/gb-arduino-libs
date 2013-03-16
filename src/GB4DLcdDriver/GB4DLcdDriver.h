@@ -130,6 +130,8 @@ class GB4DLcdDriver
     uint8_t enableTouch(bool enable);
     uint8_t setImageFormat(uint8_t format);
     uint8_t getTouchActivity();
+    uint8_t getTouchXYCoord(uint16_t &x, uint16_t &y);
+    uint8_t detectTouchRegion(uint16_t xTL, uint16_t yTL, uint16_t xBR, uint16_t yBR);
 		
     uint8_t drawString(uint8_t column, uint8_t row, SGC_FONT font, int16_t color, const char *string);
     uint8_t drawString(uint8_t column, uint8_t row, SGC_FONT font, int16_t color, const char character);

@@ -241,25 +241,69 @@ uint8_t GB4DLcdDriver::setImageFormat(uint8_t format) {
 }
 
 uint8_t GB4DLcdDriver::getTouchActivity() {
+	uint8_t cnt=0,tBuff[6];
 	_transport->select();
 	_transport->prepareWrite();
 	_transport->write(0x6f);
 	_transport->write((uint8_t)0x04);
 	transportDeselect();
 
-//	_transport->select();
-//	// Wait for a response
-//	_transport->waitForData();
-//	transportDeselect();
-//
-//	_transport->select();
-//	_transport->prepareRead();
-//	//_transport->read();
-//	uint8_t readByte = _transport->read();
-//	transportDeselect();
-//
-//	return readByte;
-	return readByte();
+	_transport->select();
+	_transport->prepareRead();
+	while(cnt<5){
+	tBuff[cnt++] = _transport->read();
+	}
+
+	transportDeselect();
+
+	if( (tBuff[1]>=1)&&(tBuff[1]<=3))
+		return tBuff[1];
+	else
+		return false;
+}
+
+uint8_t GB4DLcdDriver::getTouchXYCoord(uint16_t &x, uint16_t &y) {
+	uint8_t cnt=0,tBuff[6];
+	_transport->select();
+	_transport->prepareWrite();
+	_transport->write(0x6f);
+	_transport->write((uint8_t)0x05);
+	transportDeselect();
+
+	_transport->select();
+	_transport->prepareRead();
+	while(cnt<5){
+	tBuff[cnt++] = _transport->read();
+	}
+
+	transportDeselect();
+	x = (uint16_t)(tBuff[0] << 8) + tBuff[1];
+	y = (uint16_t)(tBuff[2] << 8) + tBuff[3];
+}
+
+uint8_t GB4DLcdDriver::detectTouchRegion(uint16_t xTL, uint16_t yTL, uint16_t xBR, uint16_t yBR) {
+	uint8_t cnt=0,tBuff[6];
+	_transport->select();
+	_transport->prepareWrite();
+	_transport->write(0x75);
+
+	_transport->write((byte)(xTL >> 8));
+	_transport->write((byte)(xTL & 0xff));
+	_transport->write((byte)(yTL >> 8));
+	_transport->write((byte)(yTL & 0xff));
+	_transport->write((byte)(xBR >> 8));
+	_transport->write((byte)(xBR & 0xff));
+	_transport->write((byte)(yBR >> 8));
+	_transport->write((byte)(yBR & 0xff));
+	transportDeselect();
+
+	_transport->select();
+	_transport->prepareRead();
+
+	tBuff[0] = _transport->read();
+	tBuff[1] = _transport->read();
+	transportDeselect();
+	return tBuff[0];
 }
 
 uint8_t GB4DLcdDriver::drawString(uint8_t column, uint8_t row, SGC_FONT font, int16_t color, const char *string) {
